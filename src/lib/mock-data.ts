@@ -146,7 +146,7 @@ export const roomTypes = [
       "Air conditioning and Wi-Fi"
     ],
     bestFor: "Small groups and extended stays in Negombo.",
-    images: ["/Apartment/843683514.jpg", "/Apartment/843683565 (1).jpg", "/Apartment/843683565.jpg", "/Apartment/843683568.jpg", "/Apartment/843683569.jpg", "/Apartment/843683570.jpg", "/Apartment/843683572.jpg", "/Apartment/843694021.jpg", "/Apartment/843694385.jpg"]
+    images: ["/Apartment/843683569.jpg", "/Apartment/843683514.jpg", "/Apartment/843683565 (1).jpg", "/Apartment/843683565.jpg", "/Apartment/843683568.jpg", "/Apartment/843683570.jpg", "/Apartment/843683572.jpg", "/Apartment/843694021.jpg", "/Apartment/843694385.jpg"]
   }
 ];
 
