@@ -1,7 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/stays/page": "app/stays/page.js",
-  "/admin/property/page": "app/admin/property/page.js",
-  "/about/page": "app/about/page.js",
-  "/contact/page": "app/contact/page.js"
-}
