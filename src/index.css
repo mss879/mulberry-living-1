@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/600.css";
+@import "@fontsource/dm-sans/700.css";
+
+@layer base {
+  :root {
+    /* Premium monochrome + accent palette */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+
+    /* Deep charcoal primary */
+    --primary: 0 0% 12%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light gray secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Warm gold accent */
+    --accent: 38 70% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 12%;
+
+    --radius: 0.75rem;
+
+    /* Typography */
+    --font-serif: "Playfair Display", Georgia, serif;
+    --font-sans: "DM Sans", system-ui, sans-serif;
+
+    /* Premium Gradients */
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 0% / 0.3) 0%, hsl(0 0% 0% / 0.6) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 98% / 0.9) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38 70% 50%) 0%, hsl(38 80% 60%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 8%) 0%, hsl(0 0% 15%) 100%);
+
+    /* Glass effect properties */
+    --glass-bg: hsl(0 0% 100% / 0.7);
+    --glass-border: hsl(0 0% 100% / 0.3);
+    --glass-blur: 20px;
+    --glass-bg-dark: hsl(0 0% 0% / 0.4);
+    --glass-border-dark: hsl(0 0% 100% / 0.1);
+
+    /* Premium Shadows */
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.04);
+    --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.08);
+    --shadow-lg: 0 16px 48px hsl(0 0% 0% / 0.12);
+    --shadow-xl: 0 24px 64px hsl(0 0% 0% / 0.16);
+    --shadow-glow: 0 0 60px hsl(38 70% 50% / 0.3);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.1);
+
+    /* Admin/Sidebar */
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 38 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 92%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 38 70% 55%;
+
+    /* Status colors */
+    --status-pending: 45 90% 50%;
+    --status-confirmed: 160 60% 40%;
+    --status-cancelled: 0 72% 51%;
+    --status-new: 200 80% 50%;
+    --status-in-progress: 45 90% 50%;
+    --status-closed: 160 60% 40%;
+  }
+
+  .dark {
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 8%;
+
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 38 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 85%;
+
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 0% / 0.5) 0%, hsl(0 0% 0% / 0.8) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 12%) 0%, hsl(0 0% 10%) 100%);
+
+    --glass-bg: hsl(0 0% 10% / 0.7);
+    --glass-border: hsl(0 0% 100% / 0.08);
+
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 16px 48px hsl(0 0% 0% / 0.5);
+    --shadow-xl: 0 24px 64px hsl(0 0% 0% / 0.6);
+    --shadow-glow: 0 0 60px hsl(38 70% 50% / 0.25);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  .container-narrow {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-wide {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-20 md:py-28 lg:py-36;
+  }
+
+  .heading-display {
+    @apply font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold tracking-tight text-balance leading-[1.1];
+  }
+
+  .heading-section {
+    @apply font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.15];
+  }
+
+  .heading-card {
+    @apply font-serif text-xl md:text-2xl font-medium;
+  }
+
+  .body-large {
+    @apply text-lg md:text-xl text-muted-foreground leading-relaxed;
+  }
+
+  /* Glassmorphism Effects */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-dark {
+    background: var(--glass-bg-dark);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border-dark);
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-glass;
+  }
+
+  .glass-card-dark {
+    @apply glass-dark rounded-2xl shadow-glass;
+  }
+
+  /* Premium hover effects */
+  .hover-lift {
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-2 shadow-xl;
+  }
+
+  .image-zoom {
+    @apply overflow-hidden;
+  }
+
+  .image-zoom img {
+    @apply transition-transform duration-700 ease-out;
+  }
+
+  .image-zoom:hover img {
+    @apply scale-110;
+  }
+
+  /* Stat card styling */
+  .stat-card {
+    @apply glass-card-dark p-6 md:p-8 text-center;
+  }
+
+  .stat-number {
+    @apply font-serif text-4xl md:text-5xl font-semibold text-primary-foreground mb-2;
+  }
+
+  .stat-label {
+    @apply text-sm md:text-base text-primary-foreground/70 uppercase tracking-wider;
+  }
+}
