@@ -7,6 +7,8 @@ import { ArrowRight, Bed, Users, Home as HomeIcon, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
 import { useStays } from '@/hooks/useStays';
+import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from '@/hooks/useAvailability';
+import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import heroImage from '@/assets/hero-villa.jpg';
 
@@ -44,7 +46,9 @@ const getImageForSlug = (slug: string) => {
 };
 
 export default function StaysIndex() {
-  const { data: stays, isLoading } = useStays();
+  const { data: stays, isLoading: staysLoading } = useStays();
+  const { data: bookings = [], isLoading: bookingsLoading } = useAllConfirmedBookings();
+  const isLoading = staysLoading || bookingsLoading;
 
   return (
     <Layout>
@@ -112,16 +116,18 @@ export default function StaysIndex() {
             >
               {stays?.map((stay) => {
                 const amenities = (stay.amenities as string[]) || [];
-                const available = stay.inventory_available ?? stay.inventory_total ?? 1;
-                const total = stay.inventory_total ?? 1;
-                const isAvailable = available > 0;
                 const unitType = stay.inventory_type === 'bed' ? 'beds' : stay.inventory_type === 'unit' ? 'unit' : 'rooms';
+                
+                // Real-time Availability
+                const today = new Date();
+                const { availableCount, isAvailable } = getAvailabilityOnDate(today, stay, bookings);
+                const nextDate = !isAvailable ? getNextAvailableDate(stay, bookings) : null;
 
                 return (
                   <motion.div
                     key={stay.id}
                     variants={fadeInUp}
-                    className="group relative rounded-3xl bg-card border border-border overflow-hidden hover-lift"
+                    className="group relative rounded-3xl bg-card border border-border overflow-hidden hover-lift flex flex-col"
                   >
                     {/* Status Badge */}
                     <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full text-xs font-medium shadow-sm ${
@@ -129,7 +135,9 @@ export default function StaysIndex() {
                         ? 'bg-primary/90 text-primary-foreground backdrop-blur-md' 
                         : 'bg-destructive/90 text-destructive-foreground backdrop-blur-md'
                     }`}>
-                      {isAvailable ? `${available} ${unitType} left` : 'Fully Booked'}
+                      {isAvailable 
+                        ? `${availableCount} ${unitType} left` 
+                        : nextDate ? `Booked till ${format(nextDate, 'MMM d')}` : 'Fully Booked'}
                     </div>
 
                     <div className="relative w-full h-64 overflow-hidden">

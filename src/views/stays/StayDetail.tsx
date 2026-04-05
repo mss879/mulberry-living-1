@@ -8,6 +8,8 @@ import { ArrowLeft, Check, MessageCircle, Calendar, Users, ChevronRight } from '
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
 import { useStay } from '@/hooks/useStays';
+import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from '@/hooks/useAvailability';
+import { format } from 'date-fns';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import heroImage from '@/assets/hero-villa.jpg';
@@ -72,7 +74,10 @@ interface Rules {
 
 export default function StayDetail({ slug }: { slug: string }) {
   const router = useRouter();
-  const { data: stay, isLoading, error } = useStay(slug || '');
+  const { data: stay, isLoading: stayLoading, error } = useStay(slug || '');
+  const { data: bookings = [], isLoading: bookingsLoading } = useAllConfirmedBookings();
+
+  const isLoading = stayLoading || bookingsLoading;
 
   if (isLoading) {
     return (
@@ -119,10 +124,13 @@ export default function StayDetail({ slug }: { slug: string }) {
     ? (stay.rules as unknown as Rules) 
     : {};
   
-  const available = stay.inventory_available ?? stay.inventory_total ?? 1;
-  const total = stay.inventory_total ?? 1;
-  const isAvailable = available > 0;
   const unitType = stay.inventory_type === 'bed' ? 'beds' : stay.inventory_type === 'unit' ? 'unit' : 'rooms';
+  const total = stay.inventory_total ?? 1;
+  
+  // Real-time Availability
+  const today = new Date();
+  const { availableCount, isAvailable } = getAvailabilityOnDate(today, stay, bookings);
+  const nextDate = !isAvailable ? getNextAvailableDate(stay, bookings) : null;
 
   return (
     <Layout>
@@ -146,7 +154,20 @@ export default function StayDetail({ slug }: { slug: string }) {
             <h1 className="heading-display mb-4 text-foreground">
               {stay.title}
             </h1>
-            <p className="text-lg text-muted-foreground max-w-3xl">
+            
+            <div className="flex justify-center mb-6">
+              <div className={`px-4 py-1.5 rounded-full text-sm font-medium border ${
+                isAvailable 
+                  ? 'bg-primary/10 text-primary border-primary/20' 
+                  : 'bg-destructive/10 text-destructive border-destructive/20'
+              }`}>
+                {isAvailable 
+                  ? `${availableCount} ${unitType} currently available` 
+                  : nextDate ? `Booked till ${format(nextDate, 'MMMM d, yyyy')}` : 'Currently fully booked'}
+              </div>
+            </div>
+
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0 text-center md:text-left">
               {stay.summary}
             </p>
           </div>
@@ -289,7 +310,7 @@ export default function StayDetail({ slug }: { slug: string }) {
                   {total && (
                     <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      {available} of {total} {unitType} available
+                      {availableCount} of {total} {unitType} available based on bookings
                     </p>
                   )}
                 </div>
@@ -297,12 +318,14 @@ export default function StayDetail({ slug }: { slug: string }) {
                 <div className={`p-4 rounded-xl ${isAvailable ? 'bg-primary/10 border border-primary/20' : 'bg-destructive/10 border border-destructive/20'}`}>
                   <p className="font-medium text-foreground flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {isAvailable ? `${available} ${unitType} Available` : 'Fully Booked'}
+                    {isAvailable 
+                        ? `${availableCount} ${unitType} currently available` 
+                        : nextDate ? `Booked till ${format(nextDate, 'MMMM d, yyyy')}` : 'Currently fully booked'}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
                     {isAvailable
-                      ? `Great news! We have ${available} ${unitType} ready for you.`
-                      : 'You can still send an enquiry for future dates.'}
+                      ? `Great news! We have ${availableCount} ${unitType} ready for you.`
+                      : 'These dates are booked. You can still send an enquiry for future stay dates.'}
                   </p>
                 </div>
 

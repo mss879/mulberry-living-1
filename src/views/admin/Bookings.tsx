@@ -88,7 +88,7 @@ export default function AdminBookings() {
         .select('*, stays(id, title, slug, inventory_type)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data;
+      return (data || []) as any[];
     },
   });
 
@@ -101,7 +101,7 @@ export default function AdminBookings() {
         .select('id, title, slug')
         .order('created_at', { ascending: true });
       if (error) throw error;
-      return data;
+      return (data || []) as any[];
     },
   });
 
@@ -110,8 +110,9 @@ export default function AdminBookings() {
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
       const { error } = await supabase
         .from('bookings')
-        .update(updates)
-        .eq('id', id);
+        // @ts-expect-error - Auto-generated types occasionally evaluate to 'never' for update operations
+        .update(updates as any)
+        .eq('id', id as any);
       if (error) throw error;
     },
     onSuccess: () => {

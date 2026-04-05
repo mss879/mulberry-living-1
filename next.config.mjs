@@ -4,7 +4,7 @@ const nextConfig = {
   compress: true,
   typescript: {
     // The auto-generated Supabase types are incomplete (missing bookings/enquiries/stays tables).
-    // Regenerate with `npx supabase gen types typescript` to fix, then remove this flag.
+    // Regenerating with `npx supabase gen types typescript` requires auth tokens.
     ignoreBuildErrors: true,
   },
   eslint: {

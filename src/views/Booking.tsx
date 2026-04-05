@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format } from 'date-fns';
+import { format, startOfDay, addDays, parseISO, isBefore, isSameDay } from 'date-fns';
 import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,7 @@ import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate, isDateRangeAvailable } from '@/hooks/useAvailability';
 
 const bookingSchema = z.object({
   staySlug: z.string().min(1, 'Please select a stay option'),
@@ -76,6 +77,7 @@ export default function Booking() {
   const preselectedStay = searchParams.get('stay');
   
   const { data: stays, isLoading: staysLoading } = useStays();
+  const { data: bookings = [], isLoading: bookingsLoading } = useAllConfirmedBookings();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -93,8 +95,48 @@ export default function Booking() {
   });
 
   const selectedStaySlug = form.watch('staySlug');
+  const checkInWatcher = form.watch('checkIn');
+  const checkOutWatcher = form.watch('checkOut');
+  const quantityWatcher = parseInt(form.watch('quantity') || '1');
+  
   const selectedStay = stays?.find(s => s.slug === selectedStaySlug);
-  const isOccupied = selectedStay?.status !== 'available';
+  
+  // Real-time Availability Calculation for Selected Stay (Today)
+  const today = new Date();
+  const currentAvailability = selectedStay 
+    ? getAvailabilityOnDate(today, selectedStay, bookings)
+    : { availableCount: 0, isAvailable: false };
+    
+  // Use dynamically calculated isOccupied based on today's availability
+  const isOccupied = selectedStay ? !currentAvailability.isAvailable : false;
+  const nextAvailableDate = (selectedStay && isOccupied) ? getNextAvailableDate(selectedStay, bookings) : null;
+
+  // Compute booked & available date arrays for calendar color modifiers
+  const { bookedDates, availableDates } = useMemo(() => {
+    if (!selectedStay) return { bookedDates: [] as Date[], availableDates: [] as Date[] };
+    
+    const booked: Date[] = [];
+    const available: Date[] = [];
+    const todayStart = startOfDay(new Date());
+    
+    // Look ahead 6 months
+    for (let i = 0; i < 180; i++) {
+      const date = addDays(todayStart, i);
+      const { availableCount } = getAvailabilityOnDate(date, selectedStay, bookings);
+      if (availableCount < quantityWatcher) {
+        booked.push(date);
+      } else {
+        available.push(date);
+      }
+    }
+    return { bookedDates: booked, availableDates: available };
+  }, [selectedStay, bookings, quantityWatcher]);
+
+  const calendarModifiers = { booked: bookedDates, available: availableDates };
+  const calendarModifiersClassNames = {
+    booked: 'rdp-day--booked',
+    available: 'rdp-day--available',
+  };
 
   // Update quantity options based on stay type
   const getQuantityOptions = () => {
@@ -119,8 +161,15 @@ export default function Booking() {
   const onSubmit = async (data: BookingFormData) => {
     if (!selectedStay) return;
     
+    // Live validation against booked dates
+    if (!isDateRangeAvailable(data.checkIn, data.checkOut, parseInt(data.quantity), selectedStay, bookings)) {
+      toast.error('The selected dates do not have enough availability for your required quantity. Please adjust your dates or quantity.');
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
+      // @ts-expect-error - Auto-generated types occasionally evaluate to 'never' for insert operations
       const { error } = await supabase.from('bookings').insert({
         stay_id: selectedStay.id,
         full_name: data.fullName,
@@ -253,7 +302,11 @@ export default function Booking() {
                                 {stays?.map((stay) => {
                                   const IconComponent = stayIcons[stay.slug] || Bed;
                                   const isSelected = field.value === stay.slug;
-                                  const isAvailable = stay.status === 'available';
+                                  
+                                  // Dynamic Availability
+                                  const today = new Date();
+                                  const { availableCount, isAvailable } = getAvailabilityOnDate(today, stay, bookings);
+                                  const unitType = stay.inventory_type === 'bed' ? 'beds' : stay.inventory_type === 'unit' ? 'unit' : 'rooms';
 
                                   return (
                                     <Label
@@ -271,7 +324,7 @@ export default function Booking() {
                                         id={stay.slug}
                                         className="sr-only"
                                       />
-                                      <div className="flex items-start gap-3 mb-3">
+                                      <div className="flex items-start gap-3 mb-1">
                                         <div className={cn(
                                           'p-2 rounded-lg',
                                           isSelected ? 'bg-accent/20' : 'bg-secondary'
@@ -287,12 +340,12 @@ export default function Booking() {
                                         </div>
                                       </div>
                                       <span className={cn(
-                                        'text-xs px-2 py-0.5 rounded-full self-start',
+                                        'text-xs px-2 py-0.5 rounded-full self-start mt-2',
                                         isAvailable
                                           ? 'bg-green-500/10 text-green-600'
                                           : 'bg-red-500/10 text-red-600'
                                       )}>
-                                        {isAvailable ? 'Available' : 'Occupied'}
+                                        {isAvailable ? `${availableCount} ${unitType} left` : 'Fully booked today'}
                                       </span>
                                     </Label>
                                   );
@@ -316,9 +369,9 @@ export default function Booking() {
                         <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
                           <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
                           <div>
-                            <p className="font-medium text-foreground">Currently Occupied</p>
+                            <p className="font-medium text-foreground">Currently Fully Booked</p>
                             <p className="text-sm text-muted-foreground">
-                              This option is currently occupied. You can still submit a booking request for future dates, or{' '}
+                              This option is fully booked today. {nextAvailableDate ? `It will be available next on ${format(nextAvailableDate, 'MMM d, yyyy')}. ` : ''}You can still submit a booking request for future dates, or{' '}
                               <Link href="/contact" className="text-primary underline">send an enquiry</Link>.
                             </p>
                           </div>
@@ -371,10 +424,22 @@ export default function Booking() {
                                   mode="single"
                                   selected={field.value}
                                   onSelect={field.onChange}
-                                  disabled={(date) => date < new Date()}
+                                  disabled={(date) => {
+                                    if (date < new Date(new Date().setHours(0,0,0,0))) return true;
+                                    if (!selectedStay) return false;
+                                    return getAvailabilityOnDate(date, selectedStay, bookings).availableCount < quantityWatcher;
+                                  }}
+                                  modifiers={calendarModifiers}
+                                  modifiersClassNames={calendarModifiersClassNames}
                                   initialFocus
                                   className="pointer-events-auto"
                                 />
+                                {selectedStay && (
+                                  <div className="flex items-center gap-4 px-3 pb-3 pt-1 text-xs text-muted-foreground border-t border-border mt-1">
+                                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-green-500/20 border border-green-500/40" /> Available</span>
+                                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-500/20 border border-red-500/40" /> Booked</span>
+                                  </div>
+                                )}
                               </PopoverContent>
                             </Popover>
                             <FormMessage />
@@ -409,11 +474,25 @@ export default function Booking() {
                                   onSelect={field.onChange}
                                   disabled={(date) => {
                                     const checkIn = form.getValues('checkIn');
-                                    return date < new Date() || (checkIn && date <= checkIn);
+                                    if (date < new Date(new Date().setHours(0,0,0,0))) return true;
+                                    if (checkIn && date <= checkIn) return true;
+                                    if (!selectedStay) return false;
+                                    if (checkIn) {
+                                      return !isDateRangeAvailable(checkIn, date, quantityWatcher, selectedStay, bookings);
+                                    }
+                                    return false;
                                   }}
+                                  modifiers={calendarModifiers}
+                                  modifiersClassNames={calendarModifiersClassNames}
                                   initialFocus
                                   className="pointer-events-auto"
                                 />
+                                {selectedStay && (
+                                  <div className="flex items-center gap-4 px-3 pb-3 pt-1 text-xs text-muted-foreground border-t border-border mt-1">
+                                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-green-500/20 border border-green-500/40" /> Available</span>
+                                    <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-500/20 border border-red-500/40" /> Booked</span>
+                                  </div>
+                                )}
                               </PopoverContent>
                             </Popover>
                             <FormMessage />

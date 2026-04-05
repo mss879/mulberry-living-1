@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Layout } from "@/components/layout/Layout";
 import { propertyData, testimonials, whyChooseUs, roomTypes, experiences } from "@/lib/mock-data";
+import { useStays } from "@/hooks/useStays";
+import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from "@/hooks/useAvailability";
+import { format } from "date-fns";
 const heroImage = { src: "/hero.jpg" };
 const interiorImage = { src: "/843450348.jpg" };
 const poolImage = { src: "/DUO08647-HDR.jpg" };
@@ -87,6 +90,8 @@ const roomIcons = {
 };
 
 export default function Home() {
+  const { data: stays = [] } = useStays();
+  const { data: bookings = [] } = useAllConfirmedBookings();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
 
@@ -517,10 +522,30 @@ export default function Home() {
                       ))}
                     </div>
 
-                    <div className="p-3 rounded-xl bg-secondary border border-border/50 mb-6 inline-block w-fit">
-                      <p className="text-sm text-foreground">
-                        <span className="font-semibold mr-2">Best for:</span>{room.bestFor}
-                      </p>
+                    <div className="flex flex-wrap gap-3 mb-6">
+                      <div className="p-3 rounded-xl bg-secondary border border-border/50 inline-flex">
+                        <p className="text-sm text-foreground">
+                          <span className="font-semibold mr-2">Best for:</span>{room.bestFor}
+                        </p>
+                      </div>
+                      
+                      {(() => {
+                        const stay = stays.find(s => s.slug === room.id || s.slug.includes(room.id));
+                        if (!stay) return null;
+                        
+                        const today = new Date();
+                        const { availableCount, isAvailable } = getAvailabilityOnDate(today, stay, bookings);
+                        const nextDate = !isAvailable ? getNextAvailableDate(stay, bookings) : null;
+                        const unitType = stay.inventory_type === 'bed' ? 'beds' : stay.inventory_type === 'unit' ? 'unit' : 'rooms';
+
+                        return (
+                          <div className={`p-3 rounded-xl border inline-flex ${isAvailable ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
+                            <p className="text-sm font-medium">
+                              {isAvailable ? `${availableCount} ${unitType} available` : (nextDate ? `Booked till ${format(nextDate, 'MMM d')}` : 'Fully Booked')}
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div>
