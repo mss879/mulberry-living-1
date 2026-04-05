@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Check, ChevronLeft, ChevronRight, X, MapPin, Clock, Ban, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
@@ -55,25 +56,27 @@ export default function Property() {
       <section className="pt-20">
         <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[60vh] min-h-[400px]">
           <div
-            className="col-span-2 row-span-2 cursor-pointer overflow-hidden"
+            className="col-span-2 row-span-2 cursor-pointer overflow-hidden relative"
             onClick={() => openLightbox(0)}
           >
-            <img
+            <Image
               src={galleryImages[0].src}
               alt={galleryImages[0].alt}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              fill
+              className="object-cover hover:scale-105 transition-transform duration-500"
             />
           </div>
           {galleryImages.slice(1, 5).map((image, index) => (
             <div
               key={index}
-              className="cursor-pointer overflow-hidden"
+              className="cursor-pointer overflow-hidden relative"
               onClick={() => openLightbox(index + 1)}
             >
-              <img
+              <Image
                 src={image.src}
                 alt={image.alt}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                fill
+                className="object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
           ))}
@@ -278,16 +281,22 @@ export default function Property() {
             >
               <ChevronRight className="h-8 w-8" />
             </button>
-            <motion.img
+            <motion.div
               key={currentImage}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              src={galleryImages[currentImage].src}
-              alt={galleryImages[currentImage].alt}
-              className="max-w-[90vw] max-h-[90vh] object-contain"
+              className="relative w-[90vw] h-[90vh]"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <Image
+                src={galleryImages[currentImage].src}
+                alt={galleryImages[currentImage].alt}
+                fill
+                className="object-contain"
+                priority
+              />
+            </motion.div>
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
               {galleryImages.map((_, index) => (
                 <button

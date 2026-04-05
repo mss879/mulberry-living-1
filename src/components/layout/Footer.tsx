@@ -79,7 +79,7 @@ export function Footer() {
             <h4 className="font-serif text-lg font-medium mb-4">Follow Us</h4>
             <div className="flex gap-4">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/mulberrylivings/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
@@ -88,7 +88,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/MulberryLivings/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"

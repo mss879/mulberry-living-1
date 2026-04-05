@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowRight, Bed, Users, Home as HomeIcon, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { Layout } from '@/components/layout/Layout';
 import { useStays } from '@/hooks/useStays';
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from '@/hooks/useAvailability';
@@ -169,6 +170,15 @@ export default function StaysIndex() {
                         )}
 
                         <div className="flex flex-col gap-3">
+                          <div className="pb-3 border-b border-border/50">
+                            <PriceDisplay
+                              pricePerNight={stay.price_per_night}
+                              discountPercentage={stay.discount_percentage}
+                              discountLabel={stay.discount_label}
+                              priceText={stay.price_text}
+                              size="sm"
+                            />
+                          </div>
                           <Button asChild className="w-full">
                             <Link href={`/stays/${stay.slug}`}>
                               View Details

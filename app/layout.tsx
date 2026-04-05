@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Preloader } from "../src/components/Preloader";
 
 export const viewport: Viewport = {
   themeColor: "#1a1a1a",
@@ -76,6 +75,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://mulberry-living.com",
   },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -87,7 +90,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
         <Providers>
-          <Preloader />
           {children}
         </Providers>
       </body>

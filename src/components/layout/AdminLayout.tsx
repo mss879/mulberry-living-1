@@ -10,7 +10,8 @@ import {
   MessageSquare, 
   Settings,
   LogOut,
-  Menu
+  Menu,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface AdminLayoutProps {
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/property", label: "Property", icon: Home },
+  { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
   { href: "/admin/enquiries", label: "Enquiries", icon: MessageSquare },
   { href: "/admin/settings", label: "Settings", icon: Settings },

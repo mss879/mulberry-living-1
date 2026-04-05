@@ -56,10 +56,10 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled || !isHome
           ? "glass shadow-glass py-2"
-          : "bg-transparent py-4"
+          : "bg-transparent py-4 md:py-4"
       )}
     >
-      <div className="w-full px-6 lg:px-12 mt-2">
+      <div className="w-full pl-8 pr-10 md:px-6 lg:px-12 mt-2 md:mt-2">
         <nav aria-label="Main navigation" className="flex items-center justify-between h-16">
           {/* Logo */}
           <AnimatePresence>
@@ -142,15 +142,15 @@ export function Header() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
                 <button
-                  className="p-2"
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                >
-                  {isMobileMenuOpen ? (
-                    <X className={cn("h-6 w-6", isScrolled || !isHome ? "text-foreground" : "text-primary-foreground")} />
-                  ) : (
-                    <Menu className={cn("h-6 w-6", isScrolled || !isHome ? "text-foreground" : "text-primary-foreground")} />
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  aria-label="Open menu"
+                  className={cn("flex items-center justify-center rounded-full p-2.5 transition-colors", 
+                    isScrolled || !isHome 
+                      ? "bg-foreground text-background hover:bg-foreground/90 shadow-sm" 
+                      : "bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30"
                   )}
+                >
+                  <Menu className="h-5 w-5" />
                 </button>
               </motion.div>
             )}
@@ -158,38 +158,60 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Panel */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass border-t border-border/50"
-          >
-            <div className="container-wide py-6 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-lg font-medium py-2 transition-colors",
-                    pathname === link.href
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  )}
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-[100dvh] w-[85%] max-w-[320px] z-[70] bg-background border-l border-border/50 shadow-2xl md:hidden overflow-y-auto flex flex-col"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-border/10">
+                <span className="font-serif font-medium text-lg text-foreground">Menu</span>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 bg-secondary rounded-full text-foreground hover:bg-secondary/80 transition-colors"
                 >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="relative mt-4 flex">
-                <span className="absolute inset-0 rounded-md bg-foreground animate-beacon"></span>
-                <Button asChild className="relative w-full bg-foreground text-background hover:bg-foreground/90 rounded-md text-base h-12 font-semibold">
-                  <Link href="/booking">Book Now</Link>
-                </Button>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-            </div>
-          </motion.div>
+              <div className="p-6 flex flex-col gap-6 flex-1">
+                <div className="flex flex-col gap-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={cn(
+                        "text-xl font-medium py-3 px-4 rounded-xl transition-colors",
+                        pathname === link.href
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                      )}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+                <div className="relative mt-auto flex pb-6">
+                  <span className="absolute inset-0 rounded-md bg-foreground animate-beacon"></span>
+                  <Button asChild className="relative w-full bg-foreground text-background hover:bg-foreground/90 rounded-md text-base h-14 font-semibold shadow-lg">
+                    <Link href="/booking" onClick={() => setIsMobileMenuOpen(false)}>Book Now</Link>
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

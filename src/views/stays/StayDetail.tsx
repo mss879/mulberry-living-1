@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowLeft, Check, MessageCircle, Calendar, Users, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { Layout } from '@/components/layout/Layout';
 import { useStay } from '@/hooks/useStays';
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from '@/hooks/useAvailability';
@@ -304,9 +305,13 @@ export default function StayDetail({ slug }: { slug: string }) {
             >
               <div className="sticky top-28 p-6 rounded-2xl bg-card border border-border space-y-6">
                 <div>
-                  <p className="text-2xl font-serif font-semibold text-foreground">
-                    {stay.price_text || 'Contact for rates'}
-                  </p>
+                  <PriceDisplay
+                    pricePerNight={stay.price_per_night}
+                    discountPercentage={stay.discount_percentage}
+                    discountLabel={stay.discount_label}
+                    priceText={stay.price_text}
+                    size="lg"
+                  />
                   {total && (
                     <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
                       <Users className="h-4 w-4" />

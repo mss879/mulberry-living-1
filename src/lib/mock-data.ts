@@ -100,7 +100,7 @@ export const roomTypes = [
       "Balcony"
     ],
     bestFor: "Post-flight recovery, relaxed workdays.",
-    images: ["/Queen Room/843449416.jpg", "/Queen Room/843449658.jpg", "/Queen Room/843449733.jpg", "/Queen Room/843449793.jpg", "/Queen Room/843683569.jpg", "/Queen Room/843690968.jpg", "/Queen Room/843691600.jpg"]
+    images: ["/Queen Room/843449793.jpg", "/Queen Room/843690968.jpg", "/Queen Room/843691600.jpg", "/Queen Room/843449416.jpg", "/Queen Room/843449658.jpg", "/Queen Room/843449733.jpg", "/Queen Room/843683569.jpg"]
   },
   {
     id: "twin",
@@ -116,7 +116,7 @@ export const roomTypes = [
       "Private balcony"
     ],
     bestFor: "Friends sharing, relaxed beach-town evenings.",
-    images: ["/Twin Room with Balcony/843449275.jpg", "/Twin Room with Balcony/843449283.jpg", "/Twin Room with Balcony/843449416.jpg", "/Twin Room with Balcony/843691852.jpg"]
+    images: ["/Twin Room with Balcony/843449416.jpg", "/Twin Room with Balcony/843449283.jpg", "/Twin Room with Balcony/843691852.jpg", "/Twin Room with Balcony/843449275.jpg"]
   },
   {
     id: "dorm",
@@ -130,7 +130,7 @@ export const roomTypes = [
       "Free Starlink Internet"
     ],
     bestFor: "Backpackers, groups, and travelers who like community.",
-    images: ["/6-Bed Mixed Dormitory Room/843449191.jpg", "/6-Bed Mixed Dormitory Room/843449466.jpg", "/6-Bed Mixed Dormitory Room/843450146.jpg", "/6-Bed Mixed Dormitory Room/843723344.jpg", "/6-Bed Mixed Dormitory Room/843723374.jpg"]
+    images: ["/6-Bed Mixed Dormitory Room/843449191.jpg", "/6-Bed Mixed Dormitory Room/843449466.jpg", "/6-Bed Mixed Dormitory Room/843723344.jpg", "/6-Bed Mixed Dormitory Room/843450146.jpg", "/6-Bed Mixed Dormitory Room/843723374.jpg"]
   },
   {
     id: "apartment",
@@ -144,7 +144,7 @@ export const roomTypes = [
       "Air conditioning and Free Starlink Internet"
     ],
     bestFor: "Small groups and extended stays in Negombo.",
-    images: ["/Apartment/843683569.jpg", "/Apartment/843683514.jpg", "/Apartment/843683565 (1).jpg", "/Apartment/843683565.jpg", "/Apartment/843683568.jpg", "/Apartment/843683570.jpg", "/Apartment/843683572.jpg", "/Apartment/843694021.jpg", "/Apartment/843694385.jpg"]
+    images: ["/Apartment/843683565.jpg", "/Apartment/843683569.jpg", "/Apartment/843683514.jpg", "/Apartment/843683565 (1).jpg", "/Apartment/843683568.jpg", "/Apartment/843683570.jpg", "/Apartment/843683572.jpg", "/Apartment/843694021.jpg", "/Apartment/843694385.jpg"]
   }
 ];
 

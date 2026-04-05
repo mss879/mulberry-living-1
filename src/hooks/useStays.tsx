@@ -18,6 +18,9 @@ type Stay = {
   faqs?: { q: string; a: string }[];
   rules?: Record<string, string>;
   price_text?: string;
+  price_per_night?: number;
+  discount_percentage?: number;
+  discount_label?: string;
   status?: string;
   inventory_type?: string;
   inventory_total?: number;

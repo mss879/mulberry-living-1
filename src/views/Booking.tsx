@@ -42,6 +42,7 @@ import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate, isDateRangeAvailable } from '@/hooks/useAvailability';
 
 const bookingSchema = z.object({
@@ -662,9 +663,13 @@ export default function Booking() {
                       <div className="border-t border-border pt-4 mb-4">
                         <p className="text-sm text-muted-foreground mb-1">Selected Stay</p>
                         <p className="font-semibold text-foreground">{selectedStay.title}</p>
-                        <p className="text-lg font-serif text-accent mt-2">
-                          {selectedStay.price_text || 'Contact for rates'}
-                        </p>
+                        <PriceDisplay
+                          pricePerNight={selectedStay.price_per_night}
+                          discountPercentage={selectedStay.discount_percentage}
+                          discountLabel={selectedStay.discount_label}
+                          priceText={selectedStay.price_text}
+                          size="md"
+                        />
                       </div>
                     )}
 
