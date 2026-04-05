@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { Heart, Users, Sparkles, ArrowRight, Star, Shield, MapPin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -115,9 +116,11 @@ export default function About() {
               variants={fadeInUp}
               className="relative aspect-[4/5] max-w-[360px] w-full mx-auto lg:ml-auto lg:mr-8 rounded-3xl overflow-hidden shadow-2xl"
             >
-              <img
+              <Image
                 src="/about.jpg"
-                alt="Mulberry Living space"
+                alt="Mulberry Living welcoming space in Ettukala, Negombo"
+                width={360}
+                height={450}
                 className="w-full h-full object-cover"
               />
             </motion.div>

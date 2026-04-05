@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { ArrowLeft, Check, MessageCircle, Calendar, Users, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
@@ -153,11 +154,11 @@ export default function StayDetail({ slug }: { slug: string }) {
           {/* Image Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[50vh] min-h-[400px] mb-8 rounded-3xl overflow-hidden">
             <div className="md:col-span-2 md:row-span-2 relative">
-              <img src={getImagesForSlug(stay.slug)[0]} alt={stay.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 cursor-pointer" />
+              <Image src={getImagesForSlug(stay.slug)[0]} alt={`${stay.title} — primary photo`} width={800} height={600} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 cursor-pointer" />
             </div>
             {getImagesForSlug(stay.slug).slice(1, 5).map((img, i) => (
               <div key={i} className="relative hidden md:block overflow-hidden">
-                <img src={img} alt={`${stay.title} ${i + 1}`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" />
+                <Image src={img} alt={`${stay.title} gallery photo ${i + 2}`} width={400} height={300} className="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" />
               </div>
             ))}
           </div>

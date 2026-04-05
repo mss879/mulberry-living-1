@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import logo from "@/assets/mulberry-logo-white.png";
 
 const navLinks = [
@@ -59,7 +60,7 @@ export function Header() {
       )}
     >
       <div className="w-full px-6 lg:px-12 mt-2">
-        <nav className="flex items-center justify-between h-16">
+        <nav aria-label="Main navigation" className="flex items-center justify-between h-16">
           {/* Logo */}
           <AnimatePresence>
             {showNavElements && (
@@ -75,9 +76,12 @@ export function Header() {
                     (isScrolled || !isHome) && "bg-foreground px-4 py-2 rounded-xl shadow-md"
                   )}
                 >
-                  <img 
+                  <Image 
                     src={logo.src} 
                     alt="Mulberry Living" 
+                    width={160}
+                    height={48}
+                    priority
                     className={cn(
                       "w-auto transition-all duration-300",
                       (isScrolled || !isHome) ? "h-6 md:h-8" : "h-10 md:h-12"

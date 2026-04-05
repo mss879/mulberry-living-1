@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Phone, MapPin, Instagram, Facebook, MessageCircle } from "lucide-react";
 import logo from "@/assets/mulberry-logo-white.png";
 
@@ -14,9 +15,11 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block">
-              <img 
+              <Image 
                 src={logo.src} 
                 alt="Mulberry Living Logo" 
+                width={160}
+                height={48}
                 className="h-12 w-auto"
               />
             </Link>
@@ -28,7 +31,7 @@ export function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="font-serif text-lg font-medium mb-4">Explore</h4>
-            <nav className="flex flex-col gap-3">
+            <nav aria-label="Footer navigation" className="flex flex-col gap-3">
               <Link href="/stays" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 Rooms & Apartments
               </Link>
@@ -112,9 +115,11 @@ export function Footer() {
               className="inline-flex items-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors group"
             >
               Designed & Developed by 
-              <img 
+              <Image 
                 src="/arc%20logo.png" 
                 alt="ARC AI - Web Design & Digital Solutions" 
+                width={80}
+                height={32}
                 className="h-7 md:h-8 w-auto relative translate-y-0.5 -translate-x-1" 
               />
             </a>

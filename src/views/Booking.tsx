@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -38,8 +39,6 @@ import { useStays, useStay } from '@/hooks/useStays';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import heroImage from '@/assets/hero-villa.jpg';
-const heroImageSrc = heroImage.src;
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -179,14 +178,15 @@ export default function Booking() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center">
+      <section className="relative h-[50vh] min-h-[500px] flex items-center justify-center pt-32 md:pt-40">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImageSrc})` }}
+          style={{ backgroundImage: "url('/hero.jpg')" }}
         >
-          <div className="absolute inset-0 bg-gradient-hero" />
+          <div className="absolute inset-0 bg-black/50 transition-opacity duration-300" />
         </div>
-        <div className="relative z-10 text-center text-primary-foreground">
+        
+        <div className="relative z-10 text-center text-primary-foreground container-narrow pb-24 md:pb-32">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -198,10 +198,17 @@ export default function Booking() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg opacity-90"
+            className="text-xl opacity-90 max-w-2xl mx-auto"
           >
             Choose your perfect accommodation
           </motion.p>
+        </div>
+
+        {/* Wave Divider */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 transform translate-y-[1px]">
+          <svg className="relative block w-full h-[60px] md:h-[100px]" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path className="fill-background" d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z"></path>
+          </svg>
         </div>
       </section>
 
@@ -560,9 +567,11 @@ export default function Booking() {
                   className="lg:col-span-1"
                 >
                   <div className="sticky top-28 p-6 rounded-2xl bg-card border border-border">
-                    <img
-                      src={heroImageSrc}
-                      alt="Mulberry Living"
+                    <Image
+                      src="/hero.jpg"
+                      alt="Mulberry Living accommodation in Negombo"
+                      width={400}
+                      height={160}
                       className="w-full h-40 object-cover rounded-xl mb-4"
                     />
                     <h3 className="heading-card mb-2">Mulberry Living</h3>

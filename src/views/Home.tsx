@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 import { ArrowRight, Wifi, Car, Shield, Eye, Star, MapPin, Bed, Users, Home as HomeIcon, Check, MessageCircle } from "lucide-react";
@@ -65,7 +66,7 @@ const stagger: Variants = {
 };
 
 const stats = [
-  { number: "200+", label: "Happy Guests" },
+  { number: "100+", label: "Happy Guests" },
   { number: "5★", label: "Rating" },
   { number: "3", label: "Room Types" },
   { number: "24/7", label: "Support" },
@@ -251,9 +252,11 @@ export default function Home() {
                   transition={{ duration: 0.8 }}
                   className="col-span-7 image-zoom rounded-2xl overflow-hidden"
                 >
-                  <img
+                  <Image
                     src={interiorImage.src}
-                    alt="Mulberry Living interior"
+                    alt="Mulberry Living interior lounge area in Negombo"
+                    width={800}
+                    height={320}
                     className="w-full h-80 object-cover"
                   />
                 </motion.div>
@@ -264,9 +267,11 @@ export default function Home() {
                   transition={{ duration: 0.8, delay: 0.1 }}
                   className="col-span-5 image-zoom rounded-2xl overflow-hidden"
                 >
-                  <img
+                  <Image
                     src={poolImage.src}
-                    alt="Common area"
+                    alt="Mulberry Living common area and pool in Negombo"
+                    width={600}
+                    height={320}
                     className="w-full h-80 object-cover"
                   />
                 </motion.div>
@@ -277,9 +282,11 @@ export default function Home() {
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="col-span-5 image-zoom rounded-2xl overflow-hidden"
                 >
-                  <img
+                  <Image
                     src={bedroomImage.src}
-                    alt="Bedroom"
+                    alt="Comfortable bedroom at Mulberry Living Negombo"
+                    width={600}
+                    height={256}
                     className="w-full h-64 object-cover"
                   />
                 </motion.div>
@@ -290,9 +297,11 @@ export default function Home() {
                   transition={{ duration: 0.8, delay: 0.3 }}
                   className="col-span-7 image-zoom rounded-2xl overflow-hidden"
                 >
-                  <img
+                  <Image
                     src={terraceImage.src}
-                    alt="Rooftop view"
+                    alt="Rooftop terrace view at Mulberry Living Negombo"
+                    width={800}
+                    height={256}
                     className="w-full h-64 object-cover"
                   />
                 </motion.div>
@@ -418,9 +427,11 @@ export default function Home() {
               className="relative"
             >
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden">
-                <img
+                <Image
                   src={heroImage.src}
-                  alt="Mulberry Living amenities"
+                  alt="Mulberry Living amenities and facilities in Negombo"
+                  width={600}
+                  height={750}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
@@ -533,7 +544,7 @@ export default function Home() {
                       isEven ? "right-0" : "left-0"
                     )}>
                       {mainImage && (
-                        <img src={mainImage} alt={room.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                        <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
                       )}
                       <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                     </div>
@@ -544,7 +555,7 @@ export default function Home() {
                       isEven ? "left-0" : "right-0"
                     )}>
                       {secondaryImage && (
-                        <img src={secondaryImage} alt={`${room.name} detail`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                        <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                       )}
                     </div>
                   </motion.div>
