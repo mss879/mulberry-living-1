@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Layout } from "@/components/layout/Layout";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import emailjs from '@emailjs/browser';
 
 const enquirySchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -80,22 +80,27 @@ export default function Contact() {
   const onSubmit = async (data: EnquiryFormData) => {
     setIsSubmitting(true);
 
-    const { error } = await supabase.from("enquiries").insert({
-      full_name: data.fullName,
-      email: data.email,
-      phone: data.phone || null,
-      message: data.message,
-    });
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '',
+        {
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone || 'Not provided',
+          message: data.message,
+        },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || ''
+      );
 
-    setIsSubmitting(false);
-
-    if (error) {
+      setIsSubmitted(true);
+      toast.success("Message sent successfully!");
+    } catch (error) {
+      console.error("EmailJS Error:", error);
       toast.error("Failed to send message. Please try again.");
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitted(true);
-    toast.success("Message sent successfully!");
   };
 
   if (isSubmitted) {
@@ -212,7 +217,7 @@ export default function Contact() {
                   If you&apos;re ready to make a reservation, head to our booking page.
                 </p>
                 <Button asChild variant="outline" size="sm">
-                  <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer">Book Now</a>
+                  <Link href="/booking">Book Now</Link>
                 </Button>
               </div>
             </motion.div>

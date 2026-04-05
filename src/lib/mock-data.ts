@@ -13,11 +13,11 @@ Mulberry Living offers three stay options, so you can choose what fits your trip
 • 2 Mixed Dorm Rooms (3 bunk beds each) – for budget-friendly social stays  
 • A Two-Bedroom Apartment – for friends, families, and longer visits
 
-You'll also enjoy free Wi-Fi, parking, and a rooftop space to unwind with a view. Housekeeping is available on request, and laundry services are available at an additional charge.`,
+You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind with a view. Housekeeping is available on request, and laundry services are available at an additional charge.`,
   priceText: "Affordable rates for every traveler",
   pricePerNight: null,
   amenities: [
-    "Free high-speed Wi-Fi",
+    "Free Starlink Internet",
     "Clean bathrooms with hot water",
     "Air-conditioned rooms",
     "Secure premises with security and CCTV",
@@ -26,8 +26,7 @@ You'll also enjoy free Wi-Fi, parking, and a rooftop space to unwind with a view
     "Housekeeping on request",
     "Laundry service (extra charge)",
     "Mini bar facility",
-    "Balcony (private rooms)",
-    "Lockers/secure storage (dorms)"
+    "Balcony (private rooms)"
   ],
   rules: {
     checkIn: "2:00 PM",
@@ -54,11 +53,11 @@ You'll also enjoy free Wi-Fi, parking, and a rooftop space to unwind with a view
     },
     {
       q: "Is there Wi-Fi available?",
-      a: "Yes, we provide free high-speed Wi-Fi throughout the property."
+      a: "Yes, we provide free Starlink Internet throughout the property."
     },
     {
       q: "How far is the beach?",
-      a: "Negombo Beach is just 1 km away. We're also 4 km from Negombo City and 12 km from Bandaranaike International Airport (about 20 mins)."
+      a: "Negombo Beach is just 500m away. We're also 4 km from Negombo City and 12 km from Bandaranaike International Airport (about 20 mins)."
     }
   ],
   locationText: "Ettukala, Negombo, Sri Lanka – Right where you need to be. Close to the airport, beach, and everyday essentials.",
@@ -79,7 +78,7 @@ You'll also enjoy free Wi-Fi, parking, and a rooftop space to unwind with a view
     distances: [
       { place: "Bandaranaike International Airport", distance: "12 km (about 20 mins)" },
       { place: "Negombo City", distance: "4 km" },
-      { place: "Negombo Beach", distance: "1 km" },
+      { place: "Negombo Beach", distance: "500m" },
       { place: "Cafes, restaurants, supermarkets", distance: "about 1 km" },
       { place: "Kattuwa Railway Station", distance: "1 km" },
     ]
@@ -96,7 +95,7 @@ export const roomTypes = [
       "Ensuite bathroom with hot water",
       "Comfortable queen bed and fresh linen",
       "Air conditioning",
-      "Free Wi-Fi",
+      "Free Starlink Internet",
       "Mini bar facility",
       "Balcony"
     ],
@@ -112,7 +111,7 @@ export const roomTypes = [
       "Ensuite bathroom with hot water",
       "Two comfortable beds and fresh linen",
       "Air conditioning",
-      "Free Wi-Fi",
+      "Free Starlink Internet",
       "Mini bar facility",
       "Private balcony"
     ],
@@ -128,8 +127,7 @@ export const roomTypes = [
       "Comfortable bunk beds with clean bedding",
       "Shared bathrooms",
       "Fan ventilation",
-      "Lockers or secure storage",
-      "Free Wi-Fi"
+      "Free Starlink Internet"
     ],
     bestFor: "Backpackers, groups, and travelers who like community.",
     images: ["/6-Bed Mixed Dormitory Room/843449191.jpg", "/6-Bed Mixed Dormitory Room/843449466.jpg", "/6-Bed Mixed Dormitory Room/843450146.jpg", "/6-Bed Mixed Dormitory Room/843723344.jpg", "/6-Bed Mixed Dormitory Room/843723374.jpg"]
@@ -143,7 +141,7 @@ export const roomTypes = [
       "Two private bedrooms",
       "Living space to relax or hang out",
       "Kitchen or kitchenette",
-      "Air conditioning and Wi-Fi"
+      "Air conditioning and Free Starlink Internet"
     ],
     bestFor: "Small groups and extended stays in Negombo.",
     images: ["/Apartment/843683569.jpg", "/Apartment/843683514.jpg", "/Apartment/843683565 (1).jpg", "/Apartment/843683565.jpg", "/Apartment/843683568.jpg", "/Apartment/843683570.jpg", "/Apartment/843683572.jpg", "/Apartment/843694021.jpg", "/Apartment/843694385.jpg"]
@@ -165,6 +163,21 @@ export const experiences = [
     id: "boat-tour",
     name: "Boat Tours",
     description: "Scenic rides through the Negombo lagoon and waterways, a true local highlight."
+  },
+  {
+    id: "lounge",
+    name: "Lounge",
+    description: "Relax in our comfortable lounge area."
+  },
+  {
+    id: "beverages",
+    name: "Beverages",
+    description: "Tea and coffee at a charge, and cold beverages available."
+  },
+  {
+    id: "breakfast",
+    name: "Breakfast",
+    description: "Breakfast can be arranged at prior notice."
   }
 ];
 

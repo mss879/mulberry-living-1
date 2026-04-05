@@ -1,8 +1,9 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
-import { ArrowRight, Wifi, Car, Shield, Eye, Star, MapPin, Bed, Users, Home as HomeIcon, Check, MessageCircle, Play } from "lucide-react";
+import { motion, Variants, AnimatePresence } from "framer-motion";
+import { ArrowRight, Wifi, Car, Shield, Eye, Star, MapPin, Bed, Users, Home as HomeIcon, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Layout } from "@/components/layout/Layout";
@@ -28,6 +29,32 @@ const fadeInRight: Variants = {
   visible: { opacity: 1, x: 0 },
 };
 
+const heroContentLeft: Variants = {
+  hidden: { opacity: 0, x: -60 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const heroCardsRight: Variants = {
+  hidden: { opacity: 0, x: 60 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+      staggerChildren: 0.15,
+    },
+  },
+};
+
 const stagger: Variants = {
   hidden: {},
   visible: {
@@ -45,7 +72,7 @@ const stats = [
 ];
 
 const highlightAmenities = [
-  { icon: Wifi, label: "Free WiFi", description: "High-speed internet" },
+  { icon: Wifi, label: "Free Starlink WiFi", description: "High-speed internet" },
   { icon: Car, label: "Free Parking", description: "Secure parking space" },
   { icon: Shield, label: "24/7 Security", description: "Safe & protected" },
   { icon: Eye, label: "Rooftop Views", description: "Stunning panorama" },
@@ -59,28 +86,72 @@ const roomIcons = {
 };
 
 export default function Home() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoEnded, setVideoEnded] = useState(false);
+
+  useEffect(() => {
+    const playVideo = () => {
+      if (videoRef.current) {
+        videoRef.current.playbackRate = 2.0;
+        videoRef.current.play().catch(console.error);
+      }
+    };
+
+    if (typeof window !== "undefined" && window.__preloaderFinished) {
+      playVideo();
+    } else {
+      window.addEventListener("preloaderEnded", playVideo);
+      return () => window.removeEventListener("preloaderEnded", playVideo);
+    }
+  }, []);
+
+  const handleVideoEnded = () => {
+    setVideoEnded(true);
+    window.dispatchEvent(new Event("heroVideoEnded"));
+  };
+
   return (
     <Layout>
       {/* Hero Section - Contained with 7px Gap */}
       <div className="p-[7px]">
-        <section className="relative min-h-[calc(100vh-14px)] flex items-end pb-20 md:pb-32 rounded-[2rem] overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage.src})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80" />
+        <section className="relative min-h-[calc(100vh-14px)] flex items-end pb-20 md:pb-32 rounded-[2rem] overflow-hidden bg-black">
+          {/* Background Video */}
+          <div className="absolute inset-0">
+            <video
+              ref={videoRef}
+              src="/hero-vid.mp4"
+              muted
+              playsInline
+              onEnded={handleVideoEnded}
+              className="w-full h-full object-cover"
+            />
+            {/* Show overlay only after video ends to make text readable */}
+            <AnimatePresence>
+              {videoEnded && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                  className="absolute inset-0 pointer-events-none"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         <div className="relative z-10 w-full px-6 lg:px-[41px]">
           <div className="grid lg:grid-cols-[55%_45%] xl:grid-cols-[60%_40%] gap-12 items-center">
-            {/* Hero Content */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={stagger}
-              className="glass-card-dark p-6 md:p-8 rounded-3xl border border-white/10 w-fit"
-            >
+            {/* Hero Content (from left) */}
+            <AnimatePresence>
+              {videoEnded && (
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={heroContentLeft}
+                  className="glass-card-dark p-6 md:p-8 rounded-3xl border border-white/10 w-fit"
+                >
               <motion.h1
                 variants={fadeInUp}
                 className="heading-display mb-4 text-primary-foreground whitespace-pre-line !text-5xl md:!text-6xl lg:!text-[4.2rem] leading-[1.1]"
@@ -93,15 +164,19 @@ export default function Home() {
               >
                 {propertyData.summary}
               </motion.p>
-            </motion.div>
+              </ motion.div>
+            )}
+            </AnimatePresence>
 
-            {/* Stats Cards - Glass Effect */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={stagger}
-              className="grid grid-cols-2 gap-3 max-w-sm w-full lg:ml-8 lg:-mt-16 pb-8"
-            >
+            {/* Stats Cards - Glass Effect (from right) */}
+            <AnimatePresence>
+              {videoEnded && (
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={heroCardsRight}
+                  className="grid grid-cols-2 gap-3 max-w-sm w-full lg:ml-8 lg:-mt-16 pb-8"
+                >
               {stats.map((stat, index) => (
                 <motion.div
                   key={index}
@@ -112,7 +187,9 @@ export default function Home() {
                   <div className="text-xs text-primary-foreground/70 uppercase tracking-wider">{stat.label}</div>
                 </motion.div>
               ))}
-            </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -312,7 +389,7 @@ export default function Home() {
                 Everything you need for a perfect stay
               </h2>
               <p className="text-lg text-background/70 mb-8 leading-relaxed">
-                From high-speed WiFi to stunning rooftop views, we've thought of everything to make your stay comfortable and memorable.
+                From high-speed Starlink WiFi to stunning rooftop views, we've thought of everything to make your stay comfortable and memorable.
               </p>
               <div className="grid grid-cols-2 gap-6">
                 {highlightAmenities.map((amenity, i) => (
@@ -496,15 +573,16 @@ export default function Home() {
       {/* Experiences Section - Split-Pane Editorial Design */}
       <section className="py-20 md:py-28 bg-secondary border-t border-border/50">
         <div className="container-wide">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-stretch relative">
             
             {/* Left Column - Heading & Intro */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 relative">
               <motion.div
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: "-100px" }}
                 variants={stagger}
+                className="lg:sticky lg:top-[35vh]"
               >
                 <motion.p variants={fadeInUp} className="text-xs font-medium text-accent tracking-widest uppercase mb-4">
                   Extra Services
@@ -702,10 +780,10 @@ export default function Home() {
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="xl" className="bg-background text-foreground hover:bg-background/90 rounded-md font-semibold">
-                <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer">
+                <Link href="/booking">
                   Book Now
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button asChild size="xl" variant="outline" className="border-background/30 text-background bg-transparent hover:bg-background/10">
                 <a href="https://wa.me/94779900394" target="_blank" rel="noopener noreferrer">

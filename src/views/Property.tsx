@@ -232,7 +232,7 @@ export default function Property() {
                 </div>
 
                 <Button asChild className="w-full mb-4" size="lg">
-                  <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer">Book Now</a>
+                  <Link href="/booking">Book Now</Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full" size="lg">
                   <Link href="/contact">Ask a Question</Link>

@@ -307,10 +307,10 @@ export default function StayDetail({ slug }: { slug: string }) {
 
                 <div className="space-y-3">
                   <Button asChild size="lg" className="w-full">
-                    <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer">
+                    <Link href="/booking">
                       Book This Stay
                       <ChevronRight className="ml-2 h-4 w-4" />
-                    </a>
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg" className="w-full">
                     <a href="https://wa.me/94779900394" target="_blank" rel="noopener noreferrer">

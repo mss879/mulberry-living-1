@@ -167,9 +167,9 @@ export default function StaysIndex() {
                             </Link>
                           </Button>
                           <Button asChild variant="outline" className="w-full border-primary/20 hover:bg-primary/5">
-                            <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer">
+                            <Link href="/booking">
                               Book Now
-                            </a>
+                            </Link>
                           </Button>
                         </div>
                       </div>

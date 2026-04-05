@@ -364,10 +364,10 @@ export default function About() {
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild variant="hero-outline" size="xl">
-                <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer">
+                <Link href="/booking">
                   Book Your Stay
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button asChild variant="glass" size="xl">
                 <Link href="/contact">Message Us</Link>

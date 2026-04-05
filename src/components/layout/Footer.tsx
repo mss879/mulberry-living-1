@@ -32,9 +32,9 @@ export function Footer() {
               <Link href="/stays" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 Rooms & Apartments
               </Link>
-              <a href="https://hotelmate.net/hotels/mulberry-living-negombo" target="_blank" rel="noopener noreferrer" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+              <Link href="/booking" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 Book Your Stay
-              </a>
+              </Link>
               <Link href="/about" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                 About Us
               </Link>
