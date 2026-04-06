@@ -18,15 +18,18 @@ export function Preloader() {
       return;
     }
 
-    // 2.5s total time
-    // We start fade out at 2200ms with a 300ms fade transition = 2500ms
+    // Mobile: 2s total time (1700ms timeout + 300ms fade)
+    // Desktop: 2.5s total time (2200ms timeout + 300ms fade)
+    const isMobile = window.innerWidth <= 768;
+    const timeoutDuration = isMobile ? 1700 : 2200;
+
     const timer = setTimeout(() => {
       setIsVisible(false);
       if (typeof window !== "undefined") {
         window.__preloaderFinished = true;
         window.dispatchEvent(new Event("preloaderEnded"));
       }
-    }, 2200);
+    }, timeoutDuration);
     return () => clearTimeout(timer);
   }, []);
 

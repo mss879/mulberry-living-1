@@ -99,7 +99,9 @@ export default function Home() {
   useEffect(() => {
     const playVideo = () => {
       if (videoRef.current) {
-        videoRef.current.playbackRate = 2.0;
+        // Set mobile to 2.5x speed, desktop 2x speed
+        const isMobile = window.innerWidth <= 768;
+        videoRef.current.playbackRate = isMobile ? 2.5 : 2.0;
         videoRef.current.play().catch(console.error);
       }
     };
