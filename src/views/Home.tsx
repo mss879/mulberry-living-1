@@ -576,32 +576,32 @@ export default function Home() {
                     >
                       {/* Primary Image - Back */}
                       <div className={cn(
-                        "absolute top-0 w-[75%] h-[80%] rounded-[2rem] overflow-hidden shadow-2xl",
+                        "absolute top-0 w-[85%] md:w-[75%] h-[80%] md:h-[80%] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl",
                         isEven ? "right-0" : "left-0"
                       )}>
                         {mainImage && (
-                          <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                          <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} sizes="(max-width: 768px) 85vw, 50vw" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
                         )}
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                       </div>
 
                       {/* Secondary Image - Front Offset */}
                       <div className={cn(
-                        "absolute -bottom-6 md:-bottom-8 w-[55%] h-[55%] rounded-3xl overflow-hidden shadow-2xl border-[10px] border-background",
-                        isEven ? "-left-6 md:-left-8" : "-right-6 md:-right-8"
+                        "absolute bottom-0 md:-bottom-8 w-[65%] md:w-[55%] h-[55%] md:h-[55%] rounded-[1.5rem] md:rounded-3xl overflow-hidden shadow-2xl border-[6px] md:border-[10px] border-background",
+                        isEven ? "left-0 md:-left-8" : "right-0 md:-right-8"
                       )}>
                         {secondaryImage && (
-                          <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                          <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} sizes="(max-width: 768px) 65vw, 33vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                         )}
                       </div>
 
                       {/* Tertiary Image - Even Smaller Overlay */}
                       {tertiaryImage && (
                         <div className={cn(
-                          "absolute -top-10 md:-top-12 w-[35%] h-[40%] rounded-[1.5rem] overflow-hidden shadow-xl border-[8px] border-background z-20",
+                          "hidden md:block absolute -top-10 md:-top-12 w-[35%] h-[40%] rounded-[1.5rem] overflow-hidden shadow-xl border-[8px] border-background z-20",
                           isEven ? "-right-8 md:-right-10" : "-left-8 md:-left-10"
                         )}>
-                          <Image src={tertiaryImage} alt={`${room.name} extra detail`} width={300} height={250} className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                          <Image src={tertiaryImage} alt={`${room.name} extra detail`} width={300} height={250} sizes="25vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                         </div>
                       )}
                     </motion.div>
