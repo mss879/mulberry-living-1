@@ -8,10 +8,10 @@ import {
   Home, 
   Calendar, 
   MessageSquare, 
-  Settings,
   LogOut,
   Menu,
-  DollarSign
+  DollarSign,
+  Gift
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,9 +25,9 @@ const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/property", label: "Property", icon: Home },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
+  { href: "/admin/promotions", label: "Promotions", icon: Gift },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
   { href: "/admin/enquiries", label: "Enquiries", icon: MessageSquare },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
