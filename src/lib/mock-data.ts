@@ -3,7 +3,7 @@
 export const propertyData = {
   id: "1",
   name: "Mulberry Living",
-  headline: "A Tranquil Escape in\nthe Heart of Negombo",
+  headline: "Your Perfect Landing Spot\nin Tropical Negombo",
   summary: "A comfortable and welcoming space designed for travelers. Whether you're resting post-flight or exploring the coast, you'll find everything you need right here.",
   description: `Whether you are landing in Sri Lanka, heading out for your next stop, or staying a little longer, you'll find clean spaces, comfy beds, and a laid-back atmosphere where it's easy to meet people and feel at home.
 
