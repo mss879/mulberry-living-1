@@ -12,6 +12,8 @@ import {
   Eye,
   EyeOff,
   Calendar,
+  Tag,
+  TicketPercent,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
@@ -19,6 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -35,6 +44,20 @@ interface Promotion {
   is_active: boolean;
   valid_from: string | null;
   valid_until: string | null;
+  coupon_code: string | null;
+  max_uses: number;
+  times_used: number;
+  min_nights: number;
+  min_guests: number;
+  discount_type: string;
+  discount_value: number;
+  applicable_stay_id: string | null;
+}
+
+interface Stay {
+  id: string;
+  title: string;
+  slug: string;
 }
 
 export default function AdminPromotions() {
@@ -49,6 +72,13 @@ export default function AdminPromotions() {
     description: "",
     valid_from: "",
     valid_until: "",
+    coupon_code: "",
+    max_uses: "0",
+    min_nights: "0",
+    min_guests: "0",
+    discount_type: "fixed",
+    discount_value: "0",
+    applicable_stay_id: "",
   });
 
   const {
@@ -64,6 +94,18 @@ export default function AdminPromotions() {
         .order("display_order", { ascending: true });
       if (error) throw error;
       return data as Promotion[];
+    },
+  });
+
+  const { data: stays } = useQuery({
+    queryKey: ["adminStays"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stays")
+        .select("id, title, slug")
+        .order("title", { ascending: true });
+      if (error) throw error;
+      return data as Stay[];
     },
   });
 
@@ -139,6 +181,15 @@ export default function AdminPromotions() {
           valid_until: form.valid_until ?? promo.valid_until,
           display_order: form.display_order ?? promo.display_order,
           is_active: form.is_active ?? promo.is_active,
+          coupon_code: form.coupon_code !== undefined ? (form.coupon_code || null) : promo.coupon_code,
+          max_uses: form.max_uses ?? promo.max_uses,
+          min_nights: form.min_nights ?? promo.min_nights,
+          min_guests: form.min_guests ?? promo.min_guests,
+          discount_type: form.discount_type ?? promo.discount_type,
+          discount_value: form.discount_value ?? promo.discount_value,
+          applicable_stay_id: form.applicable_stay_id !== undefined
+            ? (form.applicable_stay_id || null)
+            : promo.applicable_stay_id,
         },
       });
       toast.success("Promotion updated");
@@ -177,9 +228,30 @@ export default function AdminPromotions() {
         valid_until: newPromo.valid_until || null,
         display_order: maxOrder + 1,
         is_active: true,
+        coupon_code: newPromo.coupon_code || null,
+        max_uses: parseInt(newPromo.max_uses) || 0,
+        min_nights: parseInt(newPromo.min_nights) || 0,
+        min_guests: parseInt(newPromo.min_guests) || 0,
+        discount_type: newPromo.discount_type,
+        discount_value: parseFloat(newPromo.discount_value) || 0,
+        applicable_stay_id: newPromo.applicable_stay_id || null,
       });
       toast.success("Promotion added");
-      setNewPromo({ title: "", condition: "", reward: "", description: "", valid_from: "", valid_until: "" });
+      setNewPromo({
+        title: "",
+        condition: "",
+        reward: "",
+        description: "",
+        valid_from: "",
+        valid_until: "",
+        coupon_code: "",
+        max_uses: "0",
+        min_nights: "0",
+        min_guests: "0",
+        discount_type: "fixed",
+        discount_value: "0",
+        applicable_stay_id: "",
+      });
       setIsAdding(false);
     } catch {
       toast.error("Failed to add promotion");
@@ -225,7 +297,7 @@ export default function AdminPromotions() {
               Promotions Management
             </h1>
             <p className="text-muted-foreground">
-              Create and manage promotional offers shown on the website.
+              Create and manage promotional offers and coupon codes.
             </p>
           </div>
           <div className="flex gap-2">
@@ -254,6 +326,8 @@ export default function AdminPromotions() {
                   <Plus className="h-5 w-5 text-accent" />
                   New Promotion
                 </h3>
+
+                {/* Row 1: Basic Info */}
                 <div className="grid sm:grid-cols-2 gap-4 mb-4">
                   <div className="space-y-2">
                     <Label>Group Title</Label>
@@ -287,6 +361,10 @@ export default function AdminPromotions() {
                       onChange={(e) => setNewPromo((p) => ({ ...p, reward: e.target.value }))}
                     />
                   </div>
+                </div>
+
+                {/* Row 2: Dates */}
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
                   <div className="space-y-2">
                     <Label>Valid From</Label>
                     <Input
@@ -304,6 +382,104 @@ export default function AdminPromotions() {
                     />
                   </div>
                 </div>
+
+                {/* Row 3: Coupon Code Settings */}
+                <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
+                  <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-accent" />
+                    Coupon Code Settings
+                    <span className="text-xs text-muted-foreground font-normal">(optional — leave blank for display-only offers)</span>
+                  </h4>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Coupon Code</Label>
+                      <Input
+                        placeholder="e.g. APRIL20"
+                        value={newPromo.coupon_code}
+                        onChange={(e) => setNewPromo((p) => ({ ...p, coupon_code: e.target.value.toUpperCase() }))}
+                        className="uppercase"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Max Uses</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0 = unlimited"
+                        value={newPromo.max_uses}
+                        onChange={(e) => setNewPromo((p) => ({ ...p, max_uses: e.target.value }))}
+                      />
+                      <p className="text-xs text-muted-foreground">0 = unlimited</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Discount Type</Label>
+                      <Select
+                        value={newPromo.discount_type}
+                        onValueChange={(v) => setNewPromo((p) => ({ ...p, discount_type: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fixed">Fixed ($)</SelectItem>
+                          <SelectItem value="percentage">Percentage (%)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Discount Value</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 10"
+                        value={newPromo.discount_value}
+                        onChange={(e) => setNewPromo((p) => ({ ...p, discount_value: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-3 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Min Nights Required</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={newPromo.min_nights}
+                        onChange={(e) => setNewPromo((p) => ({ ...p, min_nights: e.target.value }))}
+                      />
+                      <p className="text-xs text-muted-foreground">0 = no minimum</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Min Guests Required</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={newPromo.min_guests}
+                        onChange={(e) => setNewPromo((p) => ({ ...p, min_guests: e.target.value }))}
+                      />
+                      <p className="text-xs text-muted-foreground">0 = no minimum</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Applicable Stay</Label>
+                      <Select
+                        value={newPromo.applicable_stay_id || "any"}
+                        onValueChange={(v) => setNewPromo((p) => ({ ...p, applicable_stay_id: v === "any" ? "" : v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Any Stay" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Any Stay</SelectItem>
+                          {stays?.map((stay) => (
+                            <SelectItem key={stay.id} value={stay.id}>
+                              {stay.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
                   <Button onClick={handleAdd} disabled={insertPromo.isPending}>
                     {insertPromo.isPending ? "Adding..." : "Add Promotion"}
@@ -353,6 +529,7 @@ export default function AdminPromotions() {
 
                     {/* Editable fields */}
                     <div className="flex-1 space-y-3">
+                      {/* Row 1: Basic info */}
                       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div className="space-y-1">
                           <Label className="text-xs text-muted-foreground">Group Title</Label>
@@ -390,6 +567,8 @@ export default function AdminPromotions() {
                           />
                         </div>
                       </div>
+
+                      {/* Row 2: Dates & Description */}
                       <div className="grid sm:grid-cols-3 gap-3">
                         <div className="space-y-1">
                           <Label className="text-xs text-muted-foreground">Valid From</Label>
@@ -417,6 +596,111 @@ export default function AdminPromotions() {
                             className="h-9 text-sm"
                             placeholder="Optional extra info"
                           />
+                        </div>
+                      </div>
+
+                      {/* Row 3: Coupon settings */}
+                      <div className="p-3 rounded-lg bg-muted/40 border border-border/60">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Tag className="h-3.5 w-3.5 text-accent" />
+                          <span className="text-xs font-medium text-muted-foreground">Coupon Code</span>
+                          {promo.coupon_code && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent font-mono">
+                              {promo.coupon_code}
+                            </span>
+                          )}
+                          {promo.coupon_code && (
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              {promo.times_used} / {promo.max_uses === 0 ? "∞" : promo.max_uses} used
+                            </span>
+                          )}
+                        </div>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Code</Label>
+                            <Input
+                              value={form.coupon_code || ""}
+                              onChange={(e) => updateField(promo.id, "coupon_code", e.target.value.toUpperCase())}
+                              className="h-8 text-sm uppercase font-mono"
+                              placeholder="e.g. APRIL20"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Max Uses</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={form.max_uses}
+                              onChange={(e) => updateField(promo.id, "max_uses", parseInt(e.target.value) || 0)}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Discount Type</Label>
+                            <Select
+                              value={form.discount_type || "fixed"}
+                              onValueChange={(v) => updateField(promo.id, "discount_type", v)}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="fixed">Fixed ($)</SelectItem>
+                                <SelectItem value="percentage">Percentage (%)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Discount Value</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={form.discount_value}
+                              onChange={(e) => updateField(promo.id, "discount_value", parseFloat(e.target.value) || 0)}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid sm:grid-cols-3 gap-3 mt-2">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Min Nights</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={form.min_nights}
+                              onChange={(e) => updateField(promo.id, "min_nights", parseInt(e.target.value) || 0)}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Min Guests</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={form.min_guests}
+                              onChange={(e) => updateField(promo.id, "min_guests", parseInt(e.target.value) || 0)}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Applicable Stay</Label>
+                            <Select
+                              value={form.applicable_stay_id || "any"}
+                              onValueChange={(v) => updateField(promo.id, "applicable_stay_id", v === "any" ? "" : v)}
+                            >
+                              <SelectTrigger className="h-8 text-sm">
+                                <SelectValue placeholder="Any Stay" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="any">Any Stay</SelectItem>
+                                {stays?.map((stay) => (
+                                  <SelectItem key={stay.id} value={stay.id}>
+                                    {stay.title}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                     </div>

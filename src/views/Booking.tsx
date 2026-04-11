@@ -8,8 +8,8 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format, startOfDay, addDays, parseISO, isBefore, isSameDay } from 'date-fns';
-import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight } from 'lucide-react';
+import { format, startOfDay, addDays, parseISO, isBefore, isSameDay, differenceInCalendarDays } from 'date-fns';
+import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight, Tag, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,6 +62,15 @@ const bookingSchema = z.object({
 
 type BookingFormData = z.infer<typeof bookingSchema>;
 
+interface AppliedPromo {
+  promotion_id: string;
+  title: string;
+  reward: string;
+  discount_type: string;
+  discount_value: number;
+  coupon_code: string;
+}
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
@@ -82,6 +91,12 @@ export default function Booking() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Promotion code state
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
@@ -99,8 +114,15 @@ export default function Booking() {
   const checkInWatcher = form.watch('checkIn');
   const checkOutWatcher = form.watch('checkOut');
   const quantityWatcher = parseInt(form.watch('quantity') || '1');
+  const guestsWatcher = parseInt(form.watch('guests') || '1');
   
   const selectedStay = stays?.find(s => s.slug === selectedStaySlug);
+
+  // Calculate number of nights
+  const numberOfNights = useMemo(() => {
+    if (!checkInWatcher || !checkOutWatcher) return 0;
+    return differenceInCalendarDays(checkOutWatcher, checkInWatcher);
+  }, [checkInWatcher, checkOutWatcher]);
   
   // Real-time Availability Calculation for Selected Stay (Today)
   const today = new Date();
@@ -139,6 +161,13 @@ export default function Booking() {
     available: 'rdp-day--available',
   };
 
+  // Clear promo code when stay changes
+  useEffect(() => {
+    setAppliedPromo(null);
+    setPromoError(null);
+    setPromoCodeInput('');
+  }, [selectedStaySlug]);
+
   // Update quantity options based on stay type
   const getQuantityOptions = () => {
     if (!selectedStay) return [];
@@ -159,6 +188,83 @@ export default function Booking() {
     }
   };
 
+  // Calculate discount amount
+  const calculateDiscount = () => {
+    if (!appliedPromo || !selectedStay) return 0;
+    const pricePerNight = selectedStay.price_per_night || 0;
+    if (pricePerNight === 0) return 0;
+
+    const totalBeforeDiscount = pricePerNight * numberOfNights * quantityWatcher;
+
+    if (appliedPromo.discount_type === 'percentage') {
+      return Math.round((totalBeforeDiscount * appliedPromo.discount_value) / 100 * 100) / 100;
+    }
+    return Math.min(appliedPromo.discount_value, totalBeforeDiscount);
+  };
+
+  const discountAmount = calculateDiscount();
+  const totalBeforeDiscount = selectedStay?.price_per_night
+    ? (selectedStay.price_per_night * numberOfNights * quantityWatcher)
+    : 0;
+  const totalAfterDiscount = totalBeforeDiscount - discountAmount;
+
+  // -------- PROMO CODE VALIDATION --------
+  const handleApplyPromoCode = async () => {
+    const code = promoCodeInput.trim();
+    if (!code) {
+      setPromoError('Please enter a promotion code.');
+      return;
+    }
+    if (!selectedStay) {
+      setPromoError('Please select a stay option first.');
+      return;
+    }
+
+    setIsValidatingPromo(true);
+    setPromoError(null);
+
+    try {
+      const { data, error } = await (supabase as any).rpc('validate_promotion_code', {
+        _code: code,
+        _stay_id: selectedStay.id,
+        _nights: numberOfNights || 1,
+        _guests: guestsWatcher || 1,
+      });
+
+      if (error) throw error;
+
+      const result = typeof data === 'string' ? JSON.parse(data) : data;
+
+      if (result.valid) {
+        setAppliedPromo({
+          promotion_id: result.promotion_id,
+          title: result.title,
+          reward: result.reward,
+          discount_type: result.discount_type,
+          discount_value: result.discount_value,
+          coupon_code: code.toUpperCase(),
+        });
+        setPromoError(null);
+        toast.success(`Code "${code.toUpperCase()}" applied! ${result.reward}`);
+      } else {
+        setPromoError(result.error);
+        setAppliedPromo(null);
+      }
+    } catch (error: any) {
+      console.error('Promo validation error:', error);
+      setPromoError('Failed to validate promotion code. Please try again.');
+      setAppliedPromo(null);
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  const handleRemovePromoCode = () => {
+    setAppliedPromo(null);
+    setPromoError(null);
+    setPromoCodeInput('');
+  };
+
   const onSubmit = async (data: BookingFormData) => {
     if (!selectedStay) return;
     
@@ -170,6 +276,34 @@ export default function Booking() {
     
     setIsSubmitting(true);
     try {
+      let promotionId: string | null = null;
+      let finalDiscountAmount = 0;
+
+      // If a promo code is applied, redeem it (atomically validates + increments usage)
+      if (appliedPromo) {
+        const nights = differenceInCalendarDays(data.checkOut, data.checkIn);
+        const { data: redeemData, error: redeemError } = await (supabase as any).rpc('redeem_promotion_code', {
+          _code: appliedPromo.coupon_code,
+          _stay_id: selectedStay.id,
+          _nights: nights,
+          _guests: parseInt(data.guests),
+        });
+
+        if (redeemError) throw redeemError;
+
+        const redeemResult = typeof redeemData === 'string' ? JSON.parse(redeemData) : redeemData;
+
+        if (!redeemResult.valid) {
+          toast.error(redeemResult.error || 'Promotion code could not be applied.');
+          setAppliedPromo(null);
+          setIsSubmitting(false);
+          return;
+        }
+
+        promotionId = redeemResult.promotion_id;
+        finalDiscountAmount = discountAmount;
+      }
+
       // @ts-expect-error - Auto-generated types occasionally evaluate to 'never' for insert operations
       const { error } = await supabase.from('bookings').insert({
         stay_id: selectedStay.id,
@@ -181,6 +315,8 @@ export default function Booking() {
         check_in: format(data.checkIn, 'yyyy-MM-dd'),
         check_out: format(data.checkOut, 'yyyy-MM-dd'),
         special_requests: data.specialRequests || null,
+        promotion_id: promotionId,
+        discount_amount: finalDiscountAmount,
       });
 
       if (error) throw error;
@@ -559,10 +695,103 @@ export default function Booking() {
                     </div>
                   </div>
 
-                  {/* Step 3: Guest Information */}
-                  <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
+                  {/* Step 3: Promotion Code */}
+                  <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                       <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-accent-foreground text-sm font-bold">3</span>
+                      Promotion Code
+                      <span className="text-sm font-normal text-muted-foreground">(optional)</span>
+                    </h2>
+
+                    {appliedPromo ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-green-500/20">
+                            <Tag className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground flex items-center gap-2">
+                              <span className="font-mono text-sm bg-green-500/10 px-2 py-0.5 rounded text-green-700">{appliedPromo.coupon_code}</span>
+                              applied
+                            </p>
+                            <p className="text-sm text-green-700">
+                              {appliedPromo.reward}
+                              {appliedPromo.discount_value > 0 && (
+                                <> — {appliedPromo.discount_type === 'percentage' ? `${appliedPromo.discount_value}% off` : `$${appliedPromo.discount_value} off`}</>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-red-500/10 hover:text-red-600"
+                          onClick={handleRemovePromoCode}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </motion.div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Enter promotion code"
+                              value={promoCodeInput}
+                              onChange={(e) => {
+                                setPromoCodeInput(e.target.value.toUpperCase());
+                                if (promoError) setPromoError(null);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleApplyPromoCode();
+                                }
+                              }}
+                              className="pl-10 uppercase font-mono"
+                              disabled={isValidatingPromo}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleApplyPromoCode}
+                            disabled={isValidatingPromo || !promoCodeInput.trim()}
+                          >
+                            {isValidatingPromo ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Checking...
+                              </>
+                            ) : (
+                              'Apply'
+                            )}
+                          </Button>
+                        </div>
+                        {promoError && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-sm text-destructive flex items-center gap-1.5"
+                          >
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            {promoError}
+                          </motion.p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Step 4: Guest Information */}
+                  <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-accent-foreground text-sm font-bold">4</span>
                       Your Information
                     </h2>
 
@@ -670,6 +899,44 @@ export default function Booking() {
                           priceText={selectedStay.price_text}
                           size="md"
                         />
+                      </div>
+                    )}
+
+                    {/* Price Summary */}
+                    {selectedStay && selectedStay.price_per_night && numberOfNights > 0 && (
+                      <div className="border-t border-border pt-4 mb-4 space-y-2">
+                        <p className="text-sm font-medium text-foreground">Price Summary</p>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            ${selectedStay.price_per_night} × {numberOfNights} night{numberOfNights > 1 ? 's' : ''}
+                            {quantityWatcher > 1 ? ` × ${quantityWatcher}` : ''}
+                          </span>
+                          <span className="text-foreground">${totalBeforeDiscount.toFixed(2)}</span>
+                        </div>
+                        {appliedPromo && discountAmount > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-green-600 flex items-center gap-1">
+                              <Tag className="h-3 w-3" />
+                              Promo: {appliedPromo.coupon_code}
+                            </span>
+                            <span className="text-green-600">-${discountAmount.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="border-t border-border pt-2 flex justify-between font-semibold">
+                          <span className="text-foreground">Estimated Total</span>
+                          <span className="text-foreground">${totalAfterDiscount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Applied Promotion Badge in Sidebar */}
+                    {appliedPromo && (
+                      <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Tag className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-700">{appliedPromo.coupon_code}</span>
+                        </div>
+                        <p className="text-xs text-green-600 mt-1">{appliedPromo.reward}</p>
                       </div>
                     )}
 
