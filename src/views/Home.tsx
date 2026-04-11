@@ -580,7 +580,7 @@ export default function Home() {
                         isEven ? "right-0" : "left-0"
                       )}>
                         {mainImage && (
-                          <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} sizes="(max-width: 768px) 85vw, 50vw" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                          <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} quality={100} loading="eager" sizes="(max-width: 768px) 85vw, 50vw" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
                         )}
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                       </div>
@@ -591,7 +591,7 @@ export default function Home() {
                         isEven ? "left-0 md:-left-8" : "right-0 md:-right-8"
                       )}>
                         {secondaryImage && (
-                          <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} sizes="(max-width: 768px) 65vw, 33vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                          <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} quality={100} loading="eager" sizes="(max-width: 768px) 65vw, 33vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                         )}
                       </div>
 
@@ -601,7 +601,7 @@ export default function Home() {
                           "hidden md:block absolute -top-10 md:-top-12 w-[35%] h-[40%] rounded-[1.5rem] overflow-hidden shadow-xl border-[8px] border-background z-20",
                           isEven ? "-right-8 md:-right-10" : "-left-8 md:-left-10"
                         )}>
-                          <Image src={tertiaryImage} alt={`${room.name} extra detail`} width={300} height={250} sizes="25vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                          <Image src={tertiaryImage} alt={`${room.name} extra detail`} width={300} height={250} quality={100} loading="eager" sizes="25vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                         </div>
                       )}
                     </motion.div>
