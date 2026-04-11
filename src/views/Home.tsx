@@ -114,6 +114,23 @@ export default function Home() {
     }
   }, []);
 
+  // Disable scrolling while video is playing
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (!videoEnded) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "unset";
+      }
+    }
+    
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "unset";
+      }
+    };
+  }, [videoEnded]);
+
   const handleVideoEnded = () => {
     setVideoEnded(true);
     window.dispatchEvent(new Event("heroVideoEnded"));
@@ -204,21 +221,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
-            >
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                className="w-6 h-10 rounded-full border-2 border-primary-foreground/30 flex justify-center pt-2"
-              >
-                <div className="w-1 h-2 rounded-full bg-primary-foreground/50" />
-              </motion.div>
-            </motion.div>
+
           </section>
         </div>
 
