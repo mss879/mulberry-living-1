@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Promotions from "@/views/Promotions";
 
 export const metadata: Metadata = {
-  title: "Exclusive Offers & Promotions — Mulberry Living",
+  title: "Exclusive Offers & Promotions",
   description:
     "Discover exclusive deals at Mulberry Living, Negombo. Free city tours, airport transfers, boat trips, and complimentary nights — limited time offers for our guests.",
   keywords: [
