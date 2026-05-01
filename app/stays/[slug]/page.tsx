@@ -3,25 +3,6 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import StayDetail from "@/views/stays/StayDetail";
 
-const getImageForSlug = (slug: string): string => {
-  switch (slug) {
-    case "dorms":
-    case "6-bed-mixed-dormitory-room":
-      return "/6-Bed Mixed Dormitory Room/843450146.jpg";
-    case "apartment":
-      return "/Apartment/843683565 (1).jpg";
-    case "private-rooms":
-    case "queen":
-    case "queen-room":
-      return "/Queen Room/843449793.jpg";
-    case "twin":
-    case "twin-room-with-balcony":
-      return "/Twin Room with Balcony/843449275.jpg";
-    default:
-      return "/hero.jpg";
-  }
-};
-
 export async function generateMetadata({
   params,
 }: {
@@ -43,7 +24,7 @@ export async function generateMetadata({
 
   const { data: stay } = await supabase
     .from("stays")
-    .select("title, headline, summary, slug")
+    .select("id, title, headline, summary, slug")
     .eq("slug", params.slug)
     .single();
 
@@ -53,6 +34,17 @@ export async function generateMetadata({
       description: "The stay option you are looking for could not be found.",
     };
   }
+
+  // Fetch the primary image (position 0) from stay_images
+  const { data: primaryImage } = await (supabase as any)
+    .from("stay_images")
+    .select("url, alt")
+    .eq("stay_id", stay.id)
+    .order("position", { ascending: true })
+    .limit(1)
+    .single();
+
+  const ogImage = primaryImage?.url || "/hero.jpg";
 
   const title = `${stay.title} — ${stay.headline || "Mulberry Living"}`;
   const description =
@@ -78,10 +70,10 @@ export async function generateMetadata({
       url: `https://mulberry-living.com/stays/${params.slug}`,
       images: [
         {
-          url: getImageForSlug(stay.slug),
+          url: ogImage,
           width: 1200,
           height: 630,
-          alt: `${stay.title} at Mulberry Living`,
+          alt: primaryImage?.alt || `${stay.title} at Mulberry Living`,
         },
       ],
     },

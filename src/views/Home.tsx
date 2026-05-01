@@ -11,6 +11,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Preloader } from "@/components/Preloader";
 import { propertyData, testimonials, whyChooseUs, roomTypes, experiences } from "@/lib/mock-data";
 import { useStays } from "@/hooks/useStays";
+import { useAllStayImages } from "@/hooks/useStayImages";
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from "@/hooks/useAvailability";
 import { format } from "date-fns";
 const heroImage = { src: "/hero.jpg" };
@@ -93,6 +94,7 @@ const roomIcons = {
 export default function Home() {
   const { data: stays = [] } = useStays();
   const { data: bookings = [] } = useAllConfirmedBookings();
+  const { data: stayImagesMap = {} } = useAllStayImages();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoEnded, setVideoEnded] = useState(false);
 
@@ -148,6 +150,8 @@ export default function Home() {
               <video
                 ref={videoRef}
                 src="/hero-vid.mp4"
+                poster="/hero-vid-poster.jpg"
+                preload="auto"
                 muted
                 playsInline
                 onEnded={handleVideoEnded}
@@ -270,7 +274,7 @@ export default function Home() {
                       alt="Mulberry Living interior lounge area in Negombo"
                       width={1200}
                       height={480}
-                      quality={100}
+                      quality={80}
                       className="w-full h-80 object-cover"
                     />
                   </motion.div>
@@ -286,7 +290,7 @@ export default function Home() {
                       alt="Mulberry Living common area and pool in Negombo"
                       width={900}
                       height={480}
-                      quality={100}
+                      quality={80}
                       className="w-full h-80 object-cover"
                     />
                   </motion.div>
@@ -302,7 +306,7 @@ export default function Home() {
                       alt="Comfortable bedroom at Mulberry Living Negombo"
                       width={900}
                       height={384}
-                      quality={100}
+                      quality={80}
                       className="w-full h-64 object-cover"
                     />
                   </motion.div>
@@ -318,7 +322,7 @@ export default function Home() {
                       alt="Rooftop terrace view at Mulberry Living Negombo"
                       width={1200}
                       height={384}
-                      quality={100}
+                      quality={80}
                       className="w-full h-64 object-cover"
                     />
                   </motion.div>
@@ -449,7 +453,7 @@ export default function Home() {
                     alt="Mulberry Living amenities and facilities in Negombo"
                     width={900}
                     height={1125}
-                    quality={100}
+                    quality={80}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
@@ -503,9 +507,23 @@ export default function Home() {
             <div className="flex flex-col gap-20 md:gap-24">
               {roomTypes.map((room, index) => {
                 const isEven = index % 2 === 0;
-                const mainImage = room.images && room.images.length > 0 ? room.images[0] : "";
-                const secondaryImage = room.images && room.images.length > 1 ? room.images[1] : "";
-                const tertiaryImage = room.images && room.images.length > 2 ? room.images[2] : "";
+
+                // Map mock room IDs to DB stay for dynamic images
+                const matchedStay = stays.find(s => s.slug === room.id || s.slug.includes(room.id) || (room.id === 'queen' && s.slug === 'private-rooms') || (room.id === 'twin' && s.slug === 'private-rooms') || (room.id === 'dorm' && s.slug === 'dorms'));
+                const dbImages = matchedStay ? stayImagesMap[matchedStay.id] || [] : [];
+
+                // For queen/twin under private-rooms, split the gallery: queen gets first half, twin gets second half
+                let roomDbImages = dbImages;
+                if (matchedStay?.slug === 'private-rooms' && room.id === 'twin') {
+                  roomDbImages = dbImages.slice(Math.ceil(dbImages.length / 2));
+                } else if (matchedStay?.slug === 'private-rooms' && room.id === 'queen') {
+                  roomDbImages = dbImages.slice(0, Math.ceil(dbImages.length / 2));
+                }
+
+                // Use DB images if available, fallback to mock-data images
+                const mainImage = roomDbImages.length > 0 ? roomDbImages[0].url : (room.images && room.images.length > 0 ? room.images[0] : "");
+                const secondaryImage = roomDbImages.length > 1 ? roomDbImages[1].url : (room.images && room.images.length > 1 ? room.images[1] : "");
+                const tertiaryImage = roomDbImages.length > 2 ? roomDbImages[2].url : (room.images && room.images.length > 2 ? room.images[2] : "");
 
                 return (
                   <div key={room.id} className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -583,7 +601,7 @@ export default function Home() {
                         isEven ? "right-0" : "left-0"
                       )}>
                         {mainImage && (
-                          <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} quality={100} loading="eager" sizes="(max-width: 768px) 85vw, 50vw" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                          <Image src={mainImage} alt={`${room.name} at Mulberry Living Negombo`} width={800} height={600} quality={80} loading="eager" sizes="(max-width: 768px) 85vw, 50vw" className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
                         )}
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                       </div>
@@ -594,7 +612,7 @@ export default function Home() {
                         isEven ? "left-0 md:-left-8" : "right-0 md:-right-8"
                       )}>
                         {secondaryImage && (
-                          <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} quality={100} loading="eager" sizes="(max-width: 768px) 65vw, 33vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                          <Image src={secondaryImage} alt={`${room.name} interior detail`} width={500} height={400} quality={80} loading="eager" sizes="(max-width: 768px) 65vw, 33vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                         )}
                       </div>
 
@@ -604,7 +622,7 @@ export default function Home() {
                           "hidden md:block absolute -top-10 md:-top-12 w-[35%] h-[40%] rounded-[1.5rem] overflow-hidden shadow-xl border-[8px] border-background z-20",
                           isEven ? "-right-8 md:-right-10" : "-left-8 md:-left-10"
                         )}>
-                          <Image src={tertiaryImage} alt={`${room.name} extra detail`} width={300} height={250} quality={100} loading="eager" sizes="25vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
+                          <Image src={tertiaryImage} alt={`${room.name} extra detail`} width={300} height={250} quality={80} loading="eager" sizes="25vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-1000" />
                         </div>
                       )}
                     </motion.div>

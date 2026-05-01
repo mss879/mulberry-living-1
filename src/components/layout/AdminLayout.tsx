@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   DollarSign,
-  Gift
+  Gift,
+  ImageIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/admin/property", label: "Property", icon: Home },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/promotions", label: "Promotions", icon: Gift },
+  { href: "/admin/gallery", label: "Gallery", icon: ImageIcon },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
   { href: "/admin/enquiries", label: "Enquiries", icon: MessageSquare },
 ];

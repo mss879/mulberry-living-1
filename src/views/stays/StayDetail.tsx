@@ -13,54 +13,14 @@ import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } 
 import { format } from 'date-fns';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
-import heroImage from '@/assets/hero-villa.jpg';
+import { useStayImages } from '@/hooks/useStayImages';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
 
-const getImagesForSlug = (slug: string) => {
-  switch (slug) {
-    case 'dorms':
-    case '6-bed-mixed-dormitory-room':
-      return [
-        "/6-Bed Mixed Dormitory Room/843450146.jpg", 
-        "/6-Bed Mixed Dormitory Room/843449466.jpg", 
-        "/6-Bed Mixed Dormitory Room/843449191.jpg", 
-        "/6-Bed Mixed Dormitory Room/843723344.jpg", 
-        "/6-Bed Mixed Dormitory Room/843723374.jpg"
-      ];
-    case 'apartment':
-      return [
-        "/Apartment/843683565 (1).jpg", 
-        "/Apartment/843683514.jpg", 
-        "/Apartment/843683565.jpg", 
-        "/Apartment/843683568.jpg", 
-        "/Apartment/843683569.jpg"
-      ];
-    case 'private-rooms':
-    case 'queen':
-    case 'queen-room':
-      return [
-        "/Queen Room/843449793.jpg", 
-        "/Queen Room/843449658.jpg", 
-        "/Queen Room/843449733.jpg", 
-        "/Queen Room/843449416.jpg", 
-        "/Queen Room/843683569.jpg"
-      ];
-    case 'twin':
-    case 'twin-room-with-balcony':
-      return [
-        "/Twin Room with Balcony/843449275.jpg", 
-        "/Twin Room with Balcony/843449283.jpg", 
-        "/Twin Room with Balcony/843449416.jpg", 
-        "/Twin Room with Balcony/843691852.jpg"
-      ];
-    default:
-      return [heroImage.src, heroImage.src, heroImage.src, heroImage.src, heroImage.src];
-  }
-};
+const PLACEHOLDER_IMAGE = '/hero.jpg';
 
 interface FAQ {
   q: string;
@@ -77,6 +37,7 @@ export default function StayDetail({ slug }: { slug: string }) {
   const router = useRouter();
   const { data: stay, isLoading: stayLoading, error } = useStay(slug || '');
   const { data: bookings = [], isLoading: bookingsLoading } = useAllConfirmedBookings();
+  const { data: stayImages = [] } = useStayImages(stay?.id);
 
   const isLoading = stayLoading || bookingsLoading;
 
@@ -133,6 +94,11 @@ export default function StayDetail({ slug }: { slug: string }) {
   const { availableCount, isAvailable } = getAvailabilityOnDate(today, stay, bookings);
   const nextDate = !isAvailable ? getNextAvailableDate(stay, bookings) : null;
 
+  // Dynamic images from DB, with fallback
+  const galleryImages = stayImages.length > 0
+    ? stayImages.map(img => ({ src: img.url, alt: img.alt || `${stay.title} photo`, focalX: img.focal_x, focalY: img.focal_y }))
+    : [{ src: PLACEHOLDER_IMAGE, alt: `${stay.title} — primary photo`, focalX: 50, focalY: 50 }];
+
   return (
     <Layout>
       <section className="container-wide pt-28 pb-8">
@@ -173,14 +139,14 @@ export default function StayDetail({ slug }: { slug: string }) {
             </p>
           </div>
 
-          {/* Image Grid */}
+          {/* Image Grid — Dynamic from DB */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[50vh] min-h-[400px] mb-8 rounded-3xl overflow-hidden">
             <div className="md:col-span-2 md:row-span-2 relative">
-              <Image src={getImagesForSlug(stay.slug)[0]} alt={`${stay.title} — primary photo`} width={800} height={600} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 cursor-pointer" />
+              <Image src={galleryImages[0].src} alt={galleryImages[0].alt} width={800} height={600} priority sizes="(max-width: 768px) 100vw, 50vw" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 cursor-pointer" style={{ objectPosition: `${galleryImages[0].focalX}% ${galleryImages[0].focalY}%` }} />
             </div>
-            {getImagesForSlug(stay.slug).slice(1, 5).map((img, i) => (
+            {galleryImages.slice(1, 5).map((img, i) => (
               <div key={i} className="relative hidden md:block overflow-hidden">
-                <Image src={img} alt={`${stay.title} gallery photo ${i + 2}`} width={400} height={300} className="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" />
+                <Image src={img.src} alt={img.alt} width={400} height={300} loading="eager" sizes="25vw" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700 cursor-pointer" style={{ objectPosition: `${img.focalX}% ${img.focalY}%` }} />
               </div>
             ))}
           </div>

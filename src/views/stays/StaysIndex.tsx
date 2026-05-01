@@ -11,7 +11,7 @@ import { useStays } from '@/hooks/useStays';
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from '@/hooks/useAvailability';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
-import heroImage from '@/assets/hero-villa.jpg';
+import { useAllStayThumbnails } from '@/hooks/useStayImages';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -27,38 +27,28 @@ const stagger = {
   },
 };
 
-const getImageForSlug = (slug: string) => {
-  switch (slug) {
-    case 'dorms':
-    case '6-bed-mixed-dormitory-room':
-      return '/6-Bed Mixed Dormitory Room/843450146.jpg';
-    case 'apartment':
-      return '/Apartment/843683565 (1).jpg';
-    case 'private-rooms':
-    case 'queen':
-    case 'queen-room':
-      return '/Queen Room/843449793.jpg';
-    case 'twin':
-    case 'twin-room-with-balcony':
-      return '/Twin Room with Balcony/843449275.jpg';
-    default:
-      return heroImage.src;
-  }
-};
+const PLACEHOLDER_IMAGE = '/hero.jpg';
 
 export default function StaysIndex() {
   const { data: stays, isLoading: staysLoading } = useStays();
   const { data: bookings = [], isLoading: bookingsLoading } = useAllConfirmedBookings();
+  const { data: thumbnails = {} } = useAllStayThumbnails();
   const isLoading = staysLoading || bookingsLoading;
 
   return (
     <Layout>
       {/* Hero */}
       <section className="relative h-[50vh] min-h-[500px] flex items-end pt-32 md:pt-40">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('/DUO08647-HDR.jpg')` }}
-        >
+        <div className="absolute inset-0">
+          <Image
+            src="/DUO08647-HDR.jpg"
+            alt="Mulberry Living accommodation in Negombo"
+            fill
+            priority
+            sizes="100vw"
+            quality={75}
+            className="object-cover object-center"
+          />
           <div className="absolute inset-0 bg-black/50 bg-gradient-hero" />
         </div>
         <div className="relative z-10 container-wide pb-24 md:pb-32">
@@ -142,7 +132,7 @@ export default function StaysIndex() {
                     </div>
 
                     <div className="relative w-full h-64 overflow-hidden">
-                      <Image src={getImageForSlug(stay.slug)} alt={`${stay.title} — Mulberry Living Negombo`} width={600} height={256} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <Image src={thumbnails[stay.id]?.url || PLACEHOLDER_IMAGE} alt={thumbnails[stay.id]?.alt || `${stay.title} — Mulberry Living Negombo`} width={600} height={256} loading="eager" sizes="(max-width: 768px) 100vw, 33vw" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" style={thumbnails[stay.id] ? { objectPosition: `${thumbnails[stay.id].focal_x}% ${thumbnails[stay.id].focal_y}%` } : undefined} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     </div>
 

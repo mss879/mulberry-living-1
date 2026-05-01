@@ -125,6 +125,9 @@ const faqSchema = {
 export default function HomePage() {
   return (
     <>
+      {/* Preload the hero video so the browser starts fetching it immediately */}
+      <link rel="preload" href="/hero-vid.mp4" as="video" type="video/mp4" />
+      <link rel="preload" href="/hero-vid-poster.jpg" as="image" />
       <JsonLd data={lodgingBusinessSchema} />
       <JsonLd data={faqSchema} />
       <Home />
