@@ -38,8 +38,39 @@ export type Database = {
         }
         Relationships: []
       }
+      airport_transfer_settings: {
+        Row: {
+          id: string
+          pickup_price: number
+          dropoff_price: number
+          is_pickup_enabled: boolean
+          is_dropoff_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          pickup_price?: number
+          dropoff_price?: number
+          is_pickup_enabled?: boolean
+          is_dropoff_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          pickup_price?: number
+          dropoff_price?: number
+          is_pickup_enabled?: boolean
+          is_dropoff_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
+          airport_dropoff: boolean
+          airport_dropoff_price: number
+          airport_pickup: boolean
+          airport_pickup_price: number
           check_in: string
           check_out: string
           created_at: string
@@ -61,6 +92,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          airport_dropoff?: boolean
+          airport_dropoff_price?: number
+          airport_pickup?: boolean
+          airport_pickup_price?: number
           check_in: string
           check_out: string
           created_at?: string
@@ -82,6 +117,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          airport_dropoff?: boolean
+          airport_dropoff_price?: number
+          airport_pickup?: boolean
+          airport_pickup_price?: number
           check_in?: string
           check_out?: string
           created_at?: string

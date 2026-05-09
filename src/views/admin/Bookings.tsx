@@ -16,7 +16,8 @@ import {
   StickyNote,
   Bed,
   Home as HomeIcon,
-  RefreshCw
+  RefreshCw,
+  Plane
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
@@ -438,6 +439,40 @@ export default function AdminBookings() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Airport Transfers */}
+                    {(selectedBooking.airport_pickup || selectedBooking.airport_dropoff) && (
+                      <div className="space-y-4">
+                        <h3 className="font-medium text-foreground flex items-center gap-2">
+                          <Plane className="h-4 w-4 text-muted-foreground" />
+                          Airport Transfers
+                        </h3>
+                        <div className="space-y-2">
+                          {selectedBooking.airport_pickup && (
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-accent/5 border border-accent/10">
+                              <div className="flex items-center gap-2">
+                                <Plane className="h-4 w-4 text-accent" />
+                                <span className="text-sm font-medium text-foreground">Airport Pickup</span>
+                              </div>
+                              <span className="text-sm font-semibold text-foreground">
+                                ${Number(selectedBooking.airport_pickup_price || 0).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                          {selectedBooking.airport_dropoff && (
+                            <div className="flex items-center justify-between p-3 rounded-lg bg-accent/5 border border-accent/10">
+                              <div className="flex items-center gap-2">
+                                <Plane className="h-4 w-4 text-accent" />
+                                <span className="text-sm font-medium text-foreground">Airport Drop-off</span>
+                              </div>
+                              <span className="text-sm font-semibold text-foreground">
+                                ${Number(selectedBooking.airport_dropoff_price || 0).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Special Requests */}
                     {selectedBooking.special_requests && (

@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, startOfDay, addDays, parseISO, isBefore, isSameDay, differenceInCalendarDays } from 'date-fns';
-import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight, Tag, X, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight, Tag, X, Loader2, Plane } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,8 +42,10 @@ import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate, isDateRangeAvailable } from '@/hooks/useAvailability';
+import { useQuery } from '@tanstack/react-query';
 
 const bookingSchema = z.object({
   staySlug: z.string().min(1, 'Please select a stay option'),
@@ -96,6 +98,24 @@ export default function Booking() {
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
+
+  // Airport transfer state
+  const [wantsPickup, setWantsPickup] = useState(false);
+  const [wantsDropoff, setWantsDropoff] = useState(false);
+
+  // Fetch airport transfer settings
+  const { data: transferSettings } = useQuery({
+    queryKey: ['airportTransferSettings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('airport_transfer_settings' as any)
+        .select('*')
+        .limit(1)
+        .single();
+      if (error) throw error;
+      return data as any;
+    },
+  });
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -206,7 +226,13 @@ export default function Booking() {
   const totalBeforeDiscount = selectedStay?.price_per_night
     ? (selectedStay.price_per_night * numberOfNights * quantityWatcher)
     : 0;
-  const totalAfterDiscount = totalBeforeDiscount - discountAmount;
+
+  // Airport transfer costs
+  const pickupCost = wantsPickup && transferSettings?.pickup_price ? Number(transferSettings.pickup_price) : 0;
+  const dropoffCost = wantsDropoff && transferSettings?.dropoff_price ? Number(transferSettings.dropoff_price) : 0;
+  const transferTotal = pickupCost + dropoffCost;
+
+  const totalAfterDiscount = totalBeforeDiscount - discountAmount + transferTotal;
 
   // -------- PROMO CODE VALIDATION --------
   const handleApplyPromoCode = async () => {
@@ -317,6 +343,10 @@ export default function Booking() {
         special_requests: data.specialRequests || null,
         promotion_id: promotionId,
         discount_amount: finalDiscountAmount,
+        airport_pickup: wantsPickup,
+        airport_dropoff: wantsDropoff,
+        airport_pickup_price: pickupCost,
+        airport_dropoff_price: dropoffCost,
       });
 
       if (error) throw error;
@@ -788,6 +818,66 @@ export default function Booking() {
                     )}
                   </div>
 
+                  {/* Step 3.5: Airport Transfers */}
+                  {transferSettings && (transferSettings.is_pickup_enabled || transferSettings.is_dropoff_enabled) && (
+                    <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
+                      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-accent-foreground text-sm">
+                          <Plane className="h-3.5 w-3.5" />
+                        </span>
+                        Airport Transfers
+                        <span className="text-sm font-normal text-muted-foreground">(optional)</span>
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Need a ride to or from the airport? Select the transfer services you'd like and we'll arrange everything for you.
+                      </p>
+                      <div className="space-y-3">
+                        {transferSettings.is_pickup_enabled && (
+                          <label
+                            className={cn(
+                              'flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                              wantsPickup
+                                ? 'border-accent bg-accent/5'
+                                : 'border-border hover:border-accent/50'
+                            )}
+                          >
+                            <Checkbox
+                              checked={wantsPickup}
+                              onCheckedChange={(checked) => setWantsPickup(checked === true)}
+                              className="h-5 w-5"
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium text-foreground">Airport Pickup</p>
+                              <p className="text-sm text-muted-foreground">We'll pick you up from the airport and bring you to Mulberry Living</p>
+                            </div>
+                            <span className="text-lg font-semibold text-foreground">${Number(transferSettings.pickup_price).toFixed(0)}</span>
+                          </label>
+                        )}
+                        {transferSettings.is_dropoff_enabled && (
+                          <label
+                            className={cn(
+                              'flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                              wantsDropoff
+                                ? 'border-accent bg-accent/5'
+                                : 'border-border hover:border-accent/50'
+                            )}
+                          >
+                            <Checkbox
+                              checked={wantsDropoff}
+                              onCheckedChange={(checked) => setWantsDropoff(checked === true)}
+                              className="h-5 w-5"
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium text-foreground">Airport Drop-off</p>
+                              <p className="text-sm text-muted-foreground">We'll drive you from Mulberry Living to the airport</p>
+                            </div>
+                            <span className="text-lg font-semibold text-foreground">${Number(transferSettings.dropoff_price).toFixed(0)}</span>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Step 4: Guest Information */}
                   <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -920,6 +1010,24 @@ export default function Booking() {
                               Promo: {appliedPromo.coupon_code}
                             </span>
                             <span className="text-green-600">-${discountAmount.toFixed(2)}</span>
+                          </div>
+                        )}
+                        {pickupCost > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <Plane className="h-3 w-3" />
+                              Airport Pickup
+                            </span>
+                            <span className="text-foreground">${pickupCost.toFixed(2)}</span>
+                          </div>
+                        )}
+                        {dropoffCost > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <Plane className="h-3 w-3" />
+                              Airport Drop-off
+                            </span>
+                            <span className="text-foreground">${dropoffCost.toFixed(2)}</span>
                           </div>
                         )}
                         <div className="border-t border-border pt-2 flex justify-between font-semibold">

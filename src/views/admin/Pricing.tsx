@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, Save, Percent, Tag, Bed, Users, Home as HomeIcon, RefreshCw } from 'lucide-react';
+import { DollarSign, Save, Percent, Tag, Bed, Users, Home as HomeIcon, RefreshCw, Plane } from 'lucide-react';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
 
 // Auto-generated Supabase types may not include pricing columns yet
 const staysClient = supabase as any;
@@ -29,10 +30,22 @@ interface PricingForm {
   discount_label: string;
 }
 
+interface TransferForm {
+  pickup_price: string;
+  dropoff_price: string;
+  is_pickup_enabled: boolean;
+  is_dropoff_enabled: boolean;
+}
+
 export default function Pricing() {
   const queryClient = useQueryClient();
   const [editingForms, setEditingForms] = useState<Record<string, PricingForm>>({});
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
+
+  // Airport transfer state
+  const [transferForm, setTransferForm] = useState<TransferForm | null>(null);
+  const [isSavingTransfer, setIsSavingTransfer] = useState(false);
+  const [transferSettingsId, setTransferSettingsId] = useState<string | null>(null);
 
   const { data: stays, isLoading, refetch } = useQuery({
     queryKey: ['adminPricingStays'],
@@ -45,6 +58,43 @@ export default function Pricing() {
       return data;
     },
   });
+
+  // Fetch airport transfer settings
+  const { data: transferSettings, refetch: refetchTransfer } = useQuery({
+    queryKey: ['adminTransferSettings'],
+    queryFn: async () => {
+      const { data, error } = await staysClient
+        .from('airport_transfer_settings')
+        .select('*')
+        .limit(1)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Sync transfer settings into local form state
+  useState(() => {
+    if (transferSettings && !transferForm) {
+      setTransferSettingsId(transferSettings.id);
+      setTransferForm({
+        pickup_price: transferSettings.pickup_price?.toString() || '0',
+        dropoff_price: transferSettings.dropoff_price?.toString() || '0',
+        is_pickup_enabled: transferSettings.is_pickup_enabled ?? true,
+        is_dropoff_enabled: transferSettings.is_dropoff_enabled ?? true,
+      });
+    }
+  });
+
+  // Effect to sync when data loads
+  const currentTransferForm = transferForm || (transferSettings ? {
+    pickup_price: transferSettings.pickup_price?.toString() || '0',
+    dropoff_price: transferSettings.dropoff_price?.toString() || '0',
+    is_pickup_enabled: transferSettings.is_pickup_enabled ?? true,
+    is_dropoff_enabled: transferSettings.is_dropoff_enabled ?? true,
+  } : null);
+
+  const hasTransferEdits = transferForm !== null;
 
   const updateStay = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
@@ -127,19 +177,174 @@ export default function Pricing() {
     }
   };
 
+  // Airport transfer save handler
+  const handleSaveTransfer = async () => {
+    if (!currentTransferForm) return;
+    const settingsId = transferSettingsId || transferSettings?.id;
+    if (!settingsId) {
+      toast.error('Transfer settings not found');
+      return;
+    }
+
+    const pickupVal = parseFloat(currentTransferForm.pickup_price);
+    const dropoffVal = parseFloat(currentTransferForm.dropoff_price);
+
+    if (isNaN(pickupVal) || pickupVal < 0) {
+      toast.error('Please enter a valid pickup price');
+      return;
+    }
+    if (isNaN(dropoffVal) || dropoffVal < 0) {
+      toast.error('Please enter a valid drop-off price');
+      return;
+    }
+
+    setIsSavingTransfer(true);
+    try {
+      const { error } = await staysClient
+        .from('airport_transfer_settings')
+        .update({
+          pickup_price: pickupVal,
+          dropoff_price: dropoffVal,
+          is_pickup_enabled: currentTransferForm.is_pickup_enabled,
+          is_dropoff_enabled: currentTransferForm.is_dropoff_enabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', settingsId);
+      if (error) throw error;
+      toast.success('Airport transfer pricing updated');
+      setTransferForm(null); // Clear editing state
+      queryClient.invalidateQueries({ queryKey: ['adminTransferSettings'] });
+      queryClient.invalidateQueries({ queryKey: ['airportTransferSettings'] });
+    } catch (error) {
+      toast.error('Failed to update transfer pricing');
+    } finally {
+      setIsSavingTransfer(false);
+    }
+  };
+
+  const updateTransferField = (field: keyof TransferForm, value: string | boolean) => {
+    const current = currentTransferForm || {
+      pickup_price: '0',
+      dropoff_price: '0',
+      is_pickup_enabled: true,
+      is_dropoff_enabled: true,
+    };
+    setTransferForm({ ...current, [field]: value });
+  };
+
   return (
     <ProtectedRoute>
       <AdminLayout>
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-serif font-semibold text-foreground mb-2">Pricing Management</h1>
-            <p className="text-muted-foreground">Set starting prices and manage discounts for each stay option.</p>
+            <p className="text-muted-foreground">Set starting prices, manage discounts, and configure airport transfer pricing.</p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <Button variant="outline" size="sm" onClick={() => { refetch(); refetchTransfer(); }}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
+
+        {/* Airport Transfer Pricing Card */}
+        {currentTransferForm && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="p-6 rounded-2xl bg-card border border-border">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="p-3 rounded-2xl bg-accent/10 shrink-0">
+                  <Plane className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Airport Transfer Pricing</h3>
+                  <p className="text-sm text-muted-foreground">Set prices for airport pickup and drop-off services. These are shown to guests during booking.</p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Pickup Price */}
+                <div className="space-y-2">
+                  <Label htmlFor="transfer-pickup-price" className="flex items-center gap-2 text-sm">
+                    <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                    Pickup Price (USD)
+                  </Label>
+                  <Input
+                    id="transfer-pickup-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 15"
+                    value={currentTransferForm.pickup_price}
+                    onChange={(e) => updateTransferField('pickup_price', e.target.value)}
+                  />
+                </div>
+
+                {/* Dropoff Price */}
+                <div className="space-y-2">
+                  <Label htmlFor="transfer-dropoff-price" className="flex items-center gap-2 text-sm">
+                    <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                    Drop-off Price (USD)
+                  </Label>
+                  <Input
+                    id="transfer-dropoff-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 15"
+                    value={currentTransferForm.dropoff_price}
+                    onChange={(e) => updateTransferField('dropoff_price', e.target.value)}
+                  />
+                </div>
+
+                {/* Pickup Enabled */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-sm">
+                    Pickup Available
+                  </Label>
+                  <div className="flex items-center gap-3 h-10">
+                    <Switch
+                      checked={currentTransferForm.is_pickup_enabled}
+                      onCheckedChange={(checked) => updateTransferField('is_pickup_enabled', checked)}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {currentTransferForm.is_pickup_enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Dropoff Enabled */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-sm">
+                    Drop-off Available
+                  </Label>
+                  <div className="flex items-center gap-3 h-10">
+                    <Switch
+                      checked={currentTransferForm.is_dropoff_enabled}
+                      onCheckedChange={(checked) => updateTransferField('is_dropoff_enabled', checked)}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {currentTransferForm.is_dropoff_enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6 pt-4 border-t border-border/50">
+                <Button
+                  onClick={handleSaveTransfer}
+                  disabled={isSavingTransfer || !hasTransferEdits}
+                  className={hasTransferEdits ? '' : 'opacity-50'}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {isSavingTransfer ? 'Saving...' : 'Save Transfer Pricing'}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {isLoading ? (
           <div className="space-y-6">
