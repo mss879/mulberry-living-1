@@ -14,6 +14,7 @@ import {
   Calendar,
   Tag,
   TicketPercent,
+  Home as HomeIcon,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -51,7 +53,7 @@ interface Promotion {
   min_guests: number;
   discount_type: string;
   discount_value: number;
-  applicable_stay_id: string | null;
+  applicable_stay_ids: string[];
 }
 
 interface Stay {
@@ -78,7 +80,7 @@ export default function AdminPromotions() {
     min_guests: "0",
     discount_type: "fixed",
     discount_value: "0",
-    applicable_stay_id: "",
+    applicable_stay_ids: [] as string[],
   });
 
   const {
@@ -187,9 +189,7 @@ export default function AdminPromotions() {
           min_guests: form.min_guests ?? promo.min_guests,
           discount_type: form.discount_type ?? promo.discount_type,
           discount_value: form.discount_value ?? promo.discount_value,
-          applicable_stay_id: form.applicable_stay_id !== undefined
-            ? (form.applicable_stay_id || null)
-            : promo.applicable_stay_id,
+          applicable_stay_ids: form.applicable_stay_ids ?? promo.applicable_stay_ids,
         },
       });
       toast.success("Promotion updated");
@@ -234,7 +234,7 @@ export default function AdminPromotions() {
         min_guests: parseInt(newPromo.min_guests) || 0,
         discount_type: newPromo.discount_type,
         discount_value: parseFloat(newPromo.discount_value) || 0,
-        applicable_stay_id: newPromo.applicable_stay_id || null,
+        applicable_stay_ids: newPromo.applicable_stay_ids.length > 0 ? newPromo.applicable_stay_ids : [],
       });
       toast.success("Promotion added");
       setNewPromo({
@@ -250,7 +250,7 @@ export default function AdminPromotions() {
         min_guests: "0",
         discount_type: "fixed",
         discount_value: "0",
-        applicable_stay_id: "",
+        applicable_stay_ids: [],
       });
       setIsAdding(false);
     } catch {
@@ -459,23 +459,37 @@ export default function AdminPromotions() {
                       <p className="text-xs text-muted-foreground">0 = no minimum</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Applicable Stay</Label>
-                      <Select
-                        value={newPromo.applicable_stay_id || "any"}
-                        onValueChange={(v) => setNewPromo((p) => ({ ...p, applicable_stay_id: v === "any" ? "" : v }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Any Stay" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Any Stay</SelectItem>
-                          {stays?.map((stay) => (
-                            <SelectItem key={stay.id} value={stay.id}>
-                              {stay.title}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>Applicable Stays</Label>
+                      <p className="text-xs text-muted-foreground mb-2">Select which properties this code works for. Leave all unchecked to apply to all stays.</p>
+                      <div className="space-y-2">
+                        {stays?.map((stay) => (
+                          <label
+                            key={stay.id}
+                            className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-all ${
+                              newPromo.applicable_stay_ids.includes(stay.id)
+                                ? 'border-accent bg-accent/5'
+                                : 'border-border hover:border-accent/50'
+                            }`}
+                          >
+                            <Checkbox
+                              checked={newPromo.applicable_stay_ids.includes(stay.id)}
+                              onCheckedChange={(checked) => {
+                                setNewPromo((p) => ({
+                                  ...p,
+                                  applicable_stay_ids: checked
+                                    ? [...p.applicable_stay_ids, stay.id]
+                                    : p.applicable_stay_ids.filter((id) => id !== stay.id),
+                                }));
+                              }}
+                            />
+                            <HomeIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm font-medium text-foreground">{stay.title}</span>
+                          </label>
+                        ))}
+                      </div>
+                      {newPromo.applicable_stay_ids.length === 0 && (
+                        <p className="text-xs text-accent italic">✓ Applies to all stays</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -683,23 +697,38 @@ export default function AdminPromotions() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">Applicable Stay</Label>
-                            <Select
-                              value={form.applicable_stay_id || "any"}
-                              onValueChange={(v) => updateField(promo.id, "applicable_stay_id", v === "any" ? "" : v)}
-                            >
-                              <SelectTrigger className="h-8 text-sm">
-                                <SelectValue placeholder="Any Stay" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="any">Any Stay</SelectItem>
-                                {stays?.map((stay) => (
-                                  <SelectItem key={stay.id} value={stay.id}>
-                                    {stay.title}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Label className="text-xs text-muted-foreground">Applicable Stays</Label>
+                            <div className="space-y-1.5">
+                              {stays?.map((stay) => {
+                                const stayIds: string[] = (form.applicable_stay_ids as string[] | undefined) || [];
+                                return (
+                                  <label
+                                    key={stay.id}
+                                    className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
+                                      stayIds.includes(stay.id)
+                                        ? 'border-accent bg-accent/5'
+                                        : 'border-border hover:border-accent/50'
+                                    }`}
+                                  >
+                                    <Checkbox
+                                      checked={stayIds.includes(stay.id)}
+                                      onCheckedChange={(checked) => {
+                                        const newIds = checked
+                                          ? [...stayIds, stay.id]
+                                          : stayIds.filter((id) => id !== stay.id);
+                                        updateField(promo.id, "applicable_stay_ids", newIds);
+                                      }}
+                                      className="h-4 w-4"
+                                    />
+                                    <HomeIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                    <span className="text-sm">{stay.title}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                            {((form.applicable_stay_ids as string[] | undefined) || []).length === 0 && (
+                              <p className="text-xs text-accent italic">✓ All stays</p>
+                            )}
                           </div>
                         </div>
                       </div>

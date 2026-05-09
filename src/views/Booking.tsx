@@ -351,6 +351,35 @@ export default function Booking() {
 
       if (error) throw error;
 
+      // Send email notification (fire-and-forget — don't block booking success)
+      try {
+        await fetch('/api/notify-booking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: data.fullName,
+            email: data.email,
+            phone: data.phone,
+            guests: parseInt(data.guests),
+            quantity: parseInt(data.quantity),
+            stayTitle: selectedStay.title,
+            checkIn: format(data.checkIn, 'PPP'),
+            checkOut: format(data.checkOut, 'PPP'),
+            nights: numberOfNights,
+            specialRequests: data.specialRequests || undefined,
+            totalAmount: totalAfterDiscount,
+            discountAmount: finalDiscountAmount,
+            promoCode: appliedPromo?.coupon_code || undefined,
+            airportPickup: wantsPickup,
+            airportDropoff: wantsDropoff,
+            airportPickupPrice: pickupCost,
+            airportDropoffPrice: dropoffCost,
+          }),
+        });
+      } catch (emailError) {
+        console.error('Email notification failed (non-blocking):', emailError);
+      }
+
       setIsSubmitted(true);
       toast.success('Booking request submitted!');
     } catch (error) {

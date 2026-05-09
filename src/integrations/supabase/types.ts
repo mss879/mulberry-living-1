@@ -301,7 +301,7 @@ export type Database = {
           min_guests: number
           discount_type: string
           discount_value: number
-          applicable_stay_id: string | null
+          applicable_stay_ids: string[]
           created_at: string
           updated_at: string
         }
@@ -322,7 +322,7 @@ export type Database = {
           min_guests?: number
           discount_type?: string
           discount_value?: number
-          applicable_stay_id?: string | null
+          applicable_stay_ids?: string[]
           created_at?: string
           updated_at?: string
         }
@@ -343,19 +343,11 @@ export type Database = {
           min_guests?: number
           discount_type?: string
           discount_value?: number
-          applicable_stay_id?: string | null
+          applicable_stay_ids?: string[]
           created_at?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "promotions_applicable_stay_id_fkey"
-            columns: ["applicable_stay_id"]
-            isOneToOne: false
-            referencedRelation: "stays"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
