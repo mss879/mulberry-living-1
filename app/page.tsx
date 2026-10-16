@@ -3,12 +3,15 @@ import Home from "@/views/Home";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Mulberry Living | Affordable Rooms & Stays in Negombo, Sri Lanka",
+  title: { absolute: "Hotel Near Colombo Airport & Negombo Beach Stay | Mulberry Living" },
   description:
-    "Book private ensuite rooms, mixed dorm beds, or a full apartment at Mulberry Living in Ettukala, Negombo — just 12 km from Colombo airport. Free Starlink WiFi, parking, rooftop views.",
+    "Stay in Ettukala, Negombo, 12 km from Colombo airport. Private ensuite rooms, dorms and a 2-bed apartment with Free Starlink WiFi, smart key entry, parking and rooftop views.",
   keywords: [
+    "hotel near Colombo airport",
+    "Negombo beach stay",
     "Negombo accommodation",
     "rooms near Colombo airport",
+    "ladies only dorm Negombo",
     "Negombo hostel",
     "budget stay Negombo",
     "Ettukala guesthouse",
@@ -23,9 +26,9 @@ export const metadata: Metadata = {
     canonical: "https://mulberry-living.com",
   },
   openGraph: {
-    title: "Mulberry Living | Affordable Rooms & Stays in Negombo, Sri Lanka",
+    title: "Hotel Near Colombo Airport & Negombo Beach Stay | Mulberry Living",
     description:
-      "Book private ensuite rooms, mixed dorm beds, or a full apartment at Mulberry Living in Ettukala, Negombo — just 12 km from Colombo airport.",
+      "Stay in Ettukala, Negombo, 12 km from Colombo airport. Private ensuite rooms, dorms and a 2-bed apartment with Free Starlink WiFi, smart key entry, parking and rooftop views.",
     url: "https://mulberry-living.com",
     images: [
       {
@@ -40,12 +43,19 @@ export const metadata: Metadata = {
 
 const lodgingBusinessSchema = {
   "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
+  "@type": ["LodgingBusiness", "LocalBusiness"],
+  "@id": "https://mulberry-living.com/#business",
   name: "Mulberry Living",
   description:
-    "A relaxed, welcoming space in Negombo, Sri Lanka offering private ensuite rooms, mixed dorm beds, and a full two-bedroom apartment for travelers.",
+    "Guest house in Ettukala, Negombo, 12 km from Colombo airport and close to the beach, offering private ensuite rooms, a mixed dorm, a ladies-only dorm, and a two-bedroom apartment.",
   url: "https://mulberry-living.com",
   telephone: "+94779900394",
+  email: "info@mulberry-living.com",
+  hasMap: "https://www.google.com/maps/search/?api=1&query=Mulberry+Living+No+25+Rani+Mawatha+Ettukala+Negombo",
+  sameAs: [
+    "https://www.instagram.com/mulberrylivings/",
+    "https://www.facebook.com/MulberryLivings/",
+  ],
   address: {
     "@type": "PostalAddress",
     streetAddress: "No 25, Rani Mawatha, Ettukala",
@@ -74,7 +84,9 @@ const lodgingBusinessSchema = {
   amenityFeature: [
     { "@type": "LocationFeatureSpecification", name: "Free Starlink WiFi", value: true },
     { "@type": "LocationFeatureSpecification", name: "Free Parking", value: true },
-    { "@type": "LocationFeatureSpecification", name: "24/7 Security & CCTV", value: true },
+    { "@type": "LocationFeatureSpecification", name: "Smart Key Entry (guest-only access)", value: true },
+    { "@type": "LocationFeatureSpecification", name: "CCTV in common areas", value: true },
+    { "@type": "LocationFeatureSpecification", name: "Airport Pickup & Drop-off", value: true },
     { "@type": "LocationFeatureSpecification", name: "Rooftop Views", value: true },
     { "@type": "LocationFeatureSpecification", name: "Air Conditioning", value: true },
     { "@type": "LocationFeatureSpecification", name: "Hot Water", value: true },
@@ -92,7 +104,7 @@ const faqSchema = {
       name: "What room types does Mulberry Living offer?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "We offer 8 ensuite private rooms, 2 mixed dorm rooms (3 bunk beds each), and a two-bedroom apartment.",
+        text: "We offer 8 ensuite private rooms, a 6-bed mixed dorm, a 6-bed ladies-only dorm, and a two-bedroom apartment (max 6 guests).",
       },
     },
     {
@@ -100,7 +112,7 @@ const faqSchema = {
       name: "Can you arrange airport transfers?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes! Airport pick-ups and drop-offs can be arranged on request.",
+        text: "Yes. Airport pickup ($15) and drop-off ($10) can be arranged on request. Our team member meets you at the Meet and Greet area at Bandaranaike International Airport.",
       },
     },
     {
@@ -108,7 +120,15 @@ const faqSchema = {
       name: "Is there Wi-Fi available?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes, we provide free Starlink Internet throughout the property.",
+        text: "Yes, we provide free Starlink WiFi throughout the property.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How does entrance access work?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Only staying guests can open the main entrance through smart key. You get a physical smart key at check-in, or an entry code on WhatsApp if you arrive late.",
       },
     },
     {

@@ -1,26 +1,47 @@
 // Mock data for the property - will be replaced with Supabase data
 
+export const WHATSAPP_URL = "https://wa.me/94779900394";
+export const WHATSAPP_DISPLAY = "+94 77 990 0394";
+export const CONTACT_EMAIL = "info@mulberry-living.com";
+export const GUEST_ENTRY_FEATURE = "Guest-only smart entrance access";
+
+export const CANCELLATION_POLICY =
+  "Free cancellation up to 48 hours before check-in. Inside 48 hours, first night charged. No-show charged in full. Early check-in / late check-out subject to availability, inquire on WhatsApp.";
+
+export const heroContent = {
+  eyebrow: "Ettukala, Negombo - 12 km from Colombo Airport, close to the beach",
+  headline: "A home away from home, minutes from the airport",
+  summary:
+    "Private ensuite rooms, mixed and ladies-only dorms, and a 2-bedroom apartment in Negombo. Free Starlink WiFi, AC private rooms, guest-only smart entry, rooftop views.",
+  trust: [
+    "Check-in 2:00 PM / Check-out 11:00 AM",
+    "Guest-only smart door access",
+    "Reply within a few hours on WhatsApp",
+  ],
+};
+
 export const propertyData = {
   id: "1",
   name: "Mulberry Living",
-  headline: "Your Perfect Landing Spot\nin Tropical Negombo",
-  summary: "A comfortable and welcoming space designed for travelers. Whether you're resting post-flight or exploring the coast, you'll find everything you need right here.",
+  headline: heroContent.headline,
+  summary: heroContent.summary,
   description: `Whether you are landing in Sri Lanka, heading out for your next stop, or staying a little longer, you'll find clean spaces, comfy beds, and a laid-back atmosphere where it's easy to meet people and feel at home.
 
-Mulberry Living offers three stay options, so you can choose what fits your trip:
+Mulberry Living offers four stay options, so you can choose what fits your trip:
 
-• 8 Ensuite Private Rooms – for couples, solo travelers, and digital nomads
-• 2 Mixed Dorm Rooms (3 bunk beds each) – for budget-friendly social stays  
-• A Two-Bedroom Apartment – for friends, families, and longer visits
+• 8 Ensuite Private Rooms - for couples, solo travellers and digital nomads
+• 1 Mixed Dorm (6 beds) + 1 Ladies-Only Dorm (6 beds) - same layout, for budget-friendly social stays
+• 1 Two-Bedroom Apartment (max 6 guests) - for friends, families and longer stays
 
-You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind with a view. Housekeeping is available on request, and laundry services are available at an additional charge.`,
+You will also enjoy free Starlink WiFi, guest-only smart entry, parking, and a rooftop space to unwind with a view. Housekeeping is available on request, and laundry services are available at an additional charge.`,
   priceText: "Affordable rates for every traveler",
   pricePerNight: null,
   amenities: [
-    "Free Starlink Internet",
+    "Free Starlink WiFi",
+    GUEST_ENTRY_FEATURE,
     "Clean bathrooms with hot water",
     "Air-conditioned rooms",
-    "Secure premises with security and CCTV",
+    "CCTV in common areas and on-call management",
     "Rooftop with a view",
     "Free parking",
     "Housekeeping on request",
@@ -31,7 +52,7 @@ You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind
   rules: {
     checkIn: "2:00 PM",
     checkOut: "11:00 AM",
-    cancellation: "Please contact us directly for our cancellation policy.",
+    cancellation: CANCELLATION_POLICY,
     other: [
       "Respectful of other guests",
       "Quiet hours observed",
@@ -41,11 +62,11 @@ You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind
   faqs: [
     {
       q: "What room types do you offer?",
-      a: "We offer 8 ensuite private rooms, 2 mixed dorm rooms (3 bunk beds each), and a two-bedroom apartment."
+      a: "We offer 8 ensuite private rooms, a 6-bed mixed dorm, a 6-bed ladies-only dorm, and a two-bedroom apartment (max 6 guests)."
     },
     {
       q: "Can you arrange airport transfers?",
-      a: "Yes! Airport pick-ups and drop-offs can be arranged on request."
+      a: "Yes. Airport pickup ($15) and drop-off ($10) can be arranged on request. Share your flight number and landing time on WhatsApp and we will coordinate."
     },
     {
       q: "What experiences can you help arrange?",
@@ -53,7 +74,11 @@ You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind
     },
     {
       q: "Is there Wi-Fi available?",
-      a: "Yes, we provide free Starlink Internet throughout the property."
+      a: "Yes, we provide free Starlink WiFi throughout the property."
+    },
+    {
+      q: "How does entrance access work?",
+      a: "Only staying guests can open the main entrance through smart key. You get a physical smart key at check-in, or an entry code on WhatsApp if you arrive late."
     },
     {
       q: "How far is the beach?",
@@ -61,13 +86,13 @@ You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind
     }
   ],
   locationText: "Ettukala, Negombo, Sri Lanka – Right where you need to be. Close to the airport, beach, and everyday essentials.",
-  mapEmbedUrl: null,
+  mapEmbedUrl: "https://maps.google.com/maps?q=Mulberry%20Living%20No%2025,%20Rani%20Mawatha,%20Ettukala,%20Negombo&t=&z=15&ie=UTF8&iwloc=&output=embed",
   status: "available" as "available" | "occupied",
   isVisible: true,
   gallery: [
     { path: "/hero.jpg", alt: "Mulberry Living exterior" },
     { path: "/DUO08623-HDR.jpg", alt: "Private room with ensuite" },
-    { path: "/DUO08647-HDR.jpg", alt: "Dorm room" },
+    { path: "/DUO08647-HDR.jpg", alt: "Mulberry Living common lounge area in Negombo" },
     { path: "/843450319.jpg", alt: "Two-bedroom apartment" },
     { path: "/843450348.jpg", alt: "Rooftop with view" },
     { path: "/843697524.jpg", alt: "Common area" },
@@ -75,6 +100,7 @@ You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind
   contact: {
     address: "No 25, Rani Mawatha, Ettukala, Negombo, Sri Lanka 11500",
     phone: "0779900394",
+    email: CONTACT_EMAIL,
     distances: [
       { place: "Bandaranaike International Airport", distance: "12 km (about 20 mins)" },
       { place: "Negombo City", distance: "4 km" },
@@ -84,6 +110,17 @@ You'll also enjoy free Starlink Internet, parking, and a rooftop space to unwind
     ]
   }
 };
+
+const dormImages = ["/6-Bed Mixed Dormitory Room/843449191.jpg", "/6-Bed Mixed Dormitory Room/843449466.jpg", "/6-Bed Mixed Dormitory Room/843723344.jpg", "/6-Bed Mixed Dormitory Room/843450146.jpg", "/6-Bed Mixed Dormitory Room/843723374.jpg"];
+// No separate photos of the ladies-only dorm yet; it shares the mixed dorm's layout
+const ladiesDormImages = [dormImages[2], dormImages[0], dormImages[3], dormImages[1], dormImages[4]];
+
+const dormFeatures = [
+  "Private bathroom",
+  "Free Starlink WiFi",
+  "Air conditioning",
+  GUEST_ENTRY_FEATURE,
+];
 
 export const roomTypes = [
   {
@@ -95,11 +132,13 @@ export const roomTypes = [
       "Ensuite bathroom with hot water",
       "Comfortable queen bed and fresh linen",
       "Air conditioning",
-      "Free Starlink Internet",
-      "Mini bar facility",
-      "Balcony"
+      "Free Starlink WiFi",
+      "Balcony and mini bar facility",
+      GUEST_ENTRY_FEATURE
     ],
     bestFor: "Post-flight recovery, relaxed workdays.",
+    href: "/stays/private-rooms",
+    whatsappToBook: false,
     images: ["/Queen Room/843449793.jpg", "/Queen Room/843690968.jpg", "/Queen Room/843691600.jpg", "/Queen Room/843449416.jpg", "/Queen Room/843449658.jpg", "/Queen Room/843449733.jpg", "/Queen Room/843683569.jpg"]
   },
   {
@@ -111,26 +150,36 @@ export const roomTypes = [
       "Ensuite bathroom with hot water",
       "Two comfortable beds and fresh linen",
       "Air conditioning",
-      "Free Starlink Internet",
-      "Mini bar facility",
-      "Private balcony"
+      "Free Starlink WiFi",
+      "Private balcony and mini bar facility",
+      GUEST_ENTRY_FEATURE
     ],
     bestFor: "Friends sharing, relaxed beach-town evenings.",
+    href: "/stays/private-rooms",
+    whatsappToBook: false,
     images: ["/Twin Room with Balcony/843449416.jpg", "/Twin Room with Balcony/843449283.jpg", "/Twin Room with Balcony/843691852.jpg", "/Twin Room with Balcony/843449275.jpg"]
   },
   {
     id: "dorm",
-    name: "6-Bed Mixed Dormitory Room",
+    name: "6-Bed Mixed Dorm",
     subtitle: "Dormitory",
-    description: "Traveling on a budget or want to meet other travelers? Our mixed dorms are simple, clean, and social.",
-    features: [
-      "Comfortable bunk beds with clean bedding",
-      "Shared bathrooms",
-      "Fan ventilation",
-      "Free Starlink Internet"
-    ],
-    bestFor: "Backpackers, groups, and travelers who like community.",
-    images: ["/6-Bed Mixed Dormitory Room/843449191.jpg", "/6-Bed Mixed Dormitory Room/843449466.jpg", "/6-Bed Mixed Dormitory Room/843723344.jpg", "/6-Bed Mixed Dormitory Room/843450146.jpg", "/6-Bed Mixed Dormitory Room/843723374.jpg"]
+    description: "Budget-friendly, clean and social.",
+    features: dormFeatures,
+    bestFor: "Backpackers, groups",
+    href: "/stays/mixed-dorm",
+    whatsappToBook: true,
+    images: dormImages
+  },
+  {
+    id: "ladies-dorm",
+    name: "Ladies-Only Dorm",
+    subtitle: "6-bed female-only dorm",
+    description: "Same clean design as our mixed dorm, reserved for women.",
+    features: dormFeatures,
+    bestFor: "Solo female travellers, friends travelling together",
+    href: "/stays/ladies-dorm",
+    whatsappToBook: true,
+    images: ladiesDormImages
   },
   {
     id: "apartment",
@@ -138,21 +187,83 @@ export const roomTypes = [
     subtitle: "Full Apartment",
     description: "More space. More privacy. More flexibility. Ideal for friends, families, and longer stays while still enjoying the Mulberry Living vibe.",
     features: [
-      "Two private bedrooms",
+      "Two private bedrooms (max 6 guests)",
       "Living space to relax or hang out",
-      "Kitchen or kitchenette",
-      "Air conditioning and Free Starlink Internet"
+      "Kitchenette",
+      "Air conditioning",
+      "Free Starlink WiFi",
+      GUEST_ENTRY_FEATURE
     ],
     bestFor: "Small groups and extended stays in Negombo.",
+    href: "/stays/apartment",
+    whatsappToBook: false,
     images: ["/Apartment/843683565.jpg", "/Apartment/843683569.jpg", "/Apartment/843683514.jpg", "/Apartment/843683565 (1).jpg", "/Apartment/843683568.jpg", "/Apartment/843683570.jpg", "/Apartment/843683572.jpg", "/Apartment/843694021.jpg", "/Apartment/843694385.jpg"]
   }
 ];
+
+const dormFaqs = [
+  {
+    q: "Is the ladies-only dorm different from the mixed dorm?",
+    a: "Same clean layout and facilities, reserved for women only for comfort. Both have private bathrooms, Starlink WiFi, Air conditioning, guest-only smart entry."
+  },
+  {
+    q: "How does entrance access work?",
+    a: "Only staying guests can open the main entrance. Perfect for late arrivals from the airport, physical key at check-in or code on WhatsApp."
+  }
+];
+
+export type StaticStay = {
+  slug: string;
+  title: string;
+  headline: string;
+  summary: string;
+  description: string;
+  best_for: string;
+  amenities: string[];
+  highlights: string[];
+  rules: { checkIn: string; checkOut: string; cancellation: string };
+  faqs: { q: string; a: string }[];
+  images: { url: string; alt: string }[];
+};
+
+/**
+ * The dorms are booked over WhatsApp, so their detail pages are served from here
+ * rather than from the `stays` table that powers the booking form.
+ */
+export const staticStays: Record<string, StaticStay> = {
+  "mixed-dorm": {
+    slug: "mixed-dorm",
+    title: "6-Bed Mixed Dorm",
+    headline: "Dormitory",
+    summary: "Budget-friendly, clean and social. Private Bathroom, Starlink Wi-Fi, Air conditioning, guest-only smart entry.",
+    description: "Our 6-bed mixed dorm is simple, clean and social: easy to meet people, easy to rest. Comfortable bunk beds with fresh bedding, a private bathroom for the dorm, air conditioning and free Starlink WiFi, with guest-only smart entry to the building.",
+    best_for: "Backpackers, groups",
+    amenities: ["Comfortable bunk beds with fresh bedding", ...dormFeatures],
+    highlights: ["6 beds", "Private bathroom", "Air conditioned", "Social without the chaos"],
+    rules: { checkIn: "2:00 PM", checkOut: "11:00 AM", cancellation: CANCELLATION_POLICY },
+    faqs: dormFaqs,
+    images: dormImages.map((url, i) => ({ url, alt: i === 0 ? "6-bed mixed dorm at Mulberry Living Negombo" : "Mixed dorm room detail" })),
+  },
+  "ladies-dorm": {
+    slug: "ladies-dorm",
+    title: "Ladies-Only Dorm",
+    headline: "6-bed female-only dorm",
+    summary: "Same clean design as our mixed dorm, reserved for women. Private bathroom, Starlink Wi-Fi, Air conditioning, guest-only smart entry.",
+    description: "Our ladies-only dorm has the same clean layout and facilities as the mixed dorm, reserved for women only for comfort. Comfortable bunk beds with fresh bedding, a private bathroom for the dorm, air conditioning and free Starlink WiFi, with guest-only smart entry to the building.",
+    best_for: "Solo female travellers, friends travelling together",
+    amenities: ["Comfortable bunk beds with fresh bedding", ...dormFeatures],
+    highlights: ["6 beds", "Women only", "Private bathroom", "Air conditioned"],
+    rules: { checkIn: "2:00 PM", checkOut: "11:00 AM", cancellation: CANCELLATION_POLICY },
+    faqs: dormFaqs,
+    images: ladiesDormImages.map((url, i) => ({ url, alt: i === 0 ? "Ladies-only dorm at Mulberry Living Negombo" : "Ladies-only dorm room detail" })),
+  },
+};
 
 export const experiences = [
   {
     id: "airport",
     name: "Airport Shuttle",
-    description: "Pick-ups and drop-offs can be arranged on request."
+    description: "Pickup ($15) and drop-off ($10) arranged on request. We meet you at the Meet and Greet area at Bandaranaike International Airport."
   },
   {
     id: "city-tour",
@@ -182,11 +293,26 @@ export const experiences = [
 ];
 
 export const whyChooseUs = [
-  "A mix of ensuite private rooms, mixed dorms, and a two-bedroom apartment",
-  "A social, traveler-friendly vibe without the chaos",
-  "Clean, safe, and well-managed",
-  "Great location in Ettukala, Negombo",
-  "Easy access to transport, tours, and local experiences"
+  {
+    title: "Ensuite private rooms, mixed dorm, ladies-only dorm, and a 2-bedroom apartment",
+    description: "Choose privacy, community, or full space to suit your trip."
+  },
+  {
+    title: "Social without the chaos",
+    description: "Easy to meet people, easy to rest."
+  },
+  {
+    title: "Clean, secure and guest-only access",
+    description: "Smart key entry for staying guests only, plus CCTV in common areas and on-call management. Fresh linen and hot water daily."
+  },
+  {
+    title: "Great base in Ettukala, Negombo",
+    description: "Close to the airport, beach, restaurants and everyday essentials."
+  },
+  {
+    title: "Airport transfers, tours and local help",
+    description: "Pickup, drop, city tour and lagoon boat tours arranged on request."
+  }
 ];
 
 export const testimonials = [

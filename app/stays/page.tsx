@@ -4,7 +4,7 @@ import StaysIndex from "@/views/stays/StaysIndex";
 export const metadata: Metadata = {
   title: "Rooms & Apartments — Stay Your Way",
   description:
-    "Browse all stay options at Mulberry Living: ensuite private queen rooms, twin rooms with balcony, 6-bed mixed dorms, and a full two-bedroom apartment in Negombo, Sri Lanka.",
+    "Browse all stay options at Mulberry Living: ensuite private queen rooms, twin rooms with balcony, a 6-bed mixed dorm, a ladies-only dorm, and a full two-bedroom apartment in Negombo, Sri Lanka.",
   keywords: [
     "Negombo rooms",
     "private rooms Negombo Sri Lanka",

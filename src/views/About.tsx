@@ -36,8 +36,8 @@ const values = [
   },
   {
     icon: Shield,
-    title: "Uncompromising Safety & Security",
-    description: "Secure premises featuring round-the-clock CCTV and a dedicated management team that cares.",
+    title: "Safety and Care",
+    description: "Secure premises with guest-only smart entry, CCTV in common areas, and on-call management that cares.",
   },
   {
     icon: Sparkles,
@@ -47,9 +47,9 @@ const values = [
 ];
 
 const stayOptions = [
-  { type: "8 Ensuite Private Rooms", description: "for couples, solo travelers, and digital nomads" },
-  { type: "2 Mixed Dorm Rooms", description: "(3 bunk beds each) for budget-friendly social stays" },
-  { type: "A Two-Bedroom Apartment", description: "for friends, families, and longer visits" },
+  { type: "8 Ensuite Private Rooms", description: "for couples, solo travellers and digital nomads" },
+  { type: "1 Mixed Dorm (6 beds) + 1 Ladies-Only Dorm (6 beds)", description: "same layout, for budget-friendly social stays" },
+  { type: "1 Two-Bedroom Apartment (max 6 guests)", description: "for friends, families and longer stays" },
 ];
 
 export default function About() {
@@ -200,7 +200,7 @@ export default function About() {
               The Space
             </motion.h2>
             <motion.p variants={fadeInUp} className="body-large">
-              Mulberry Living offers three stay options, so you can choose what fits your trip.
+              Mulberry Living offers four stay options, so you can choose what fits your trip.
             </motion.p>
           </motion.div>
 
@@ -220,7 +220,7 @@ export default function About() {
                 <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
                   <span className="font-medium text-foreground">{option.type}</span>
-                  <span className="text-muted-foreground"> – {option.description}</span>
+                  <span className="text-muted-foreground"> - {option.description}</span>
                 </div>
               </motion.div>
             ))}
@@ -232,7 +232,7 @@ export default function About() {
             viewport={{ once: true }}
             className="text-center text-muted-foreground mt-8"
           >
-            You&apos;ll also enjoy free Wi-Fi, parking, and a rooftop space to unwind with a view.
+            You will also enjoy free Starlink WiFi, guest-only smart entry, parking, and a rooftop space to unwind with a view.
             <br />
             Housekeeping is available on request, and laundry services are available at an additional charge.
           </motion.p>

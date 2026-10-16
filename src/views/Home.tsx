@@ -3,22 +3,25 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, Variants, AnimatePresence } from "framer-motion";
-import { ArrowRight, Wifi, Car, Shield, Eye, Star, MapPin, Bed, Users, Home as HomeIcon, Check, MessageCircle } from "lucide-react";
+import { motion, Variants } from "framer-motion";
+import { ArrowRight, Wifi, Car, KeyRound, Eye, Star, MapPin, Check, MessageCircle, Clock, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Layout } from "@/components/layout/Layout";
-import { Preloader } from "@/components/Preloader";
-import { propertyData, testimonials, whyChooseUs, roomTypes, experiences } from "@/lib/mock-data";
+import { onPreloaderFinished } from "@/components/Preloader";
+import { propertyData, heroContent, testimonials, whyChooseUs, roomTypes, experiences, WHATSAPP_URL } from "@/lib/mock-data";
 import { useStays } from "@/hooks/useStays";
 import { useAllStayImages } from "@/hooks/useStayImages";
 import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } from "@/hooks/useAvailability";
 import { format } from "date-fns";
 const heroImage = { src: "/hero.jpg" };
 const interiorImage = { src: "/843450348.jpg" };
-const poolImage = { src: "/DUO08647-HDR.jpg" };
+const loungeImage = { src: "/DUO08647-HDR.jpg" };
 const terraceImage = { src: "/843697524.jpg" };
 const bedroomImage = { src: "/DUO08623-HDR.jpg" };
+// Close-up of the entrance door + smart lock (no code visible). Set to e.g. "/smart-entry.jpg"
+// once the photo is added to /public and it will appear in the homepage image grid.
+const smartEntryImage: { src: string } | null = null;
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -43,7 +46,7 @@ const heroContentLeft: Variants = {
     transition: {
       duration: 0.8,
       ease: "easeOut",
-      staggerChildren: 0.15,
+      staggerChildren: 0.12,
     },
   },
 };
@@ -61,6 +64,11 @@ const heroCardsRight: Variants = {
   },
 };
 
+const heroItem: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
 const stagger: Variants = {
   hidden: {},
   visible: {
@@ -73,78 +81,42 @@ const stagger: Variants = {
 const stats = [
   { number: "100+", label: "Happy Guests" },
   { number: "5★", label: "Rating" },
-  { number: "3", label: "Room Types" },
+  { number: "4", label: "Stay Options" },
   { number: "24/7", label: "Support" },
 ];
 
-const highlightAmenities = [
-  { icon: Wifi, label: "Free Starlink WiFi", description: "High-speed internet" },
-  { icon: Car, label: "Free Parking", description: "Secure parking space" },
-  { icon: Shield, label: "24/7 Security", description: "Safe & protected" },
-  { icon: Eye, label: "Rooftop Views", description: "Stunning panorama" },
-];
+const heroTrustIcons = [Clock, KeyRound, MessageCircle];
 
-const roomIcons = {
-  queen: Bed,
-  twin: Bed,
-  dorm: Users,
-  apartment: HomeIcon,
-};
+const highlightAmenities = [
+  { icon: Wifi, label: "Free Starlink WiFi", description: "Fast WiFi for work and streaming" },
+  { icon: KeyRound, label: "Smart Key Entry", description: "Only staying guests can open the entrance door" },
+  { icon: Car, label: "Free Parking", description: "On-site parking" },
+  { icon: Eye, label: "Rooftop Views", description: "Unwind with a view" },
+];
 
 export default function Home() {
   const { data: stays = [] } = useStays();
   const { data: bookings = [] } = useAllConfirmedBookings();
   const { data: stayImagesMap = {} } = useAllStayImages();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoEnded, setVideoEnded] = useState(false);
+  const [heroReady, setHeroReady] = useState(false);
 
+  // Once the preloader is gone, reveal the hero and play the background video once.
+  // When it ends the video simply holds on its final frame.
   useEffect(() => {
-    const playVideo = () => {
-      if (videoRef.current) {
-        // Set mobile to 2.5x speed, desktop 2x speed
-        const isMobile = window.innerWidth <= 768;
-        videoRef.current.playbackRate = isMobile ? 2.5 : 2.0;
-        videoRef.current.play().catch(console.error);
-      }
-    };
-
-    if (typeof window !== "undefined" && window.__preloaderFinished) {
-      playVideo();
-    } else {
-      window.addEventListener("preloaderEnded", playVideo);
-      return () => window.removeEventListener("preloaderEnded", playVideo);
-    }
+    return onPreloaderFinished(() => {
+      setHeroReady(true);
+      videoRef.current?.play().catch(() => {
+        // Autoplay blocked (e.g. low-power mode): the poster stays as the background
+      });
+    });
   }, []);
 
-  // Disable scrolling while video is playing
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      if (!videoEnded) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "unset";
-      }
-    }
-    
-    return () => {
-      if (typeof document !== "undefined") {
-        document.body.style.overflow = "unset";
-      }
-    };
-  }, [videoEnded]);
-
-  const handleVideoEnded = () => {
-    setVideoEnded(true);
-    window.dispatchEvent(new Event("heroVideoEnded"));
-  };
-
   return (
-    <>
-      <Preloader />
-      <Layout>
+    <Layout>
         {/* Hero Section - Full bleed on mobile, contained on desktop */}
         <div className="p-0 md:p-[7px]">
-          <section className="relative min-h-[100dvh] md:min-h-[calc(100vh-14px)] flex items-end pb-20 md:pb-32 rounded-none md:rounded-[2rem] overflow-hidden bg-black">
+          <section className="relative min-h-[100svh] md:min-h-[calc(100svh-14px)] flex items-end pt-28 pb-8 sm:pb-12 md:pb-16 lg:pb-20 rounded-none md:rounded-[2rem] overflow-hidden bg-black">
             {/* Background Video */}
             <div className="absolute inset-0">
               <video
@@ -154,78 +126,99 @@ export default function Home() {
                 preload="auto"
                 muted
                 playsInline
-                onEnded={handleVideoEnded}
+                aria-hidden="true"
                 className="w-full h-full object-cover"
               />
-              {/* Show overlay only after video ends to make text readable */}
-              <AnimatePresence>
-                {videoEnded && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
-                    className="absolute inset-0 pointer-events-none"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Gradients keep the hero copy readable over the video */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: heroReady ? 1 : 0 }}
+                transition={{ duration: 1 }}
+                className="absolute inset-0 pointer-events-none"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-transparent" />
+              </motion.div>
             </div>
 
-            <div className="relative z-10 w-full px-6 lg:px-[41px]">
-              <div className="grid lg:grid-cols-[55%_45%] xl:grid-cols-[60%_40%] gap-12 items-center">
+            <div className="relative z-10 w-full px-4 sm:px-6 lg:px-10">
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 lg:gap-10">
                 {/* Hero Content (from left) */}
-                <AnimatePresence>
-                  {videoEnded && (
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={heroContentLeft}
-                      className="glass-card-dark p-6 md:p-8 rounded-3xl border border-white/10 w-fit"
-                    >
-                      <motion.h1
-                        variants={fadeInUp}
-                        className="heading-display mb-4 text-primary-foreground whitespace-pre-line !text-5xl md:!text-6xl lg:!text-[4.2rem] leading-[1.1]"
-                      >
-                        {propertyData.headline}
-                      </motion.h1>
-                      <motion.p
-                        variants={fadeInUp}
-                        className="text-lg md:text-xl text-primary-foreground/90 max-w-xl leading-relaxed"
-                      >
-                        {propertyData.summary}
-                      </motion.p>
-                    </ motion.div>
-                  )}
-                </AnimatePresence>
+                <motion.div
+                  initial="hidden"
+                  animate={heroReady ? "visible" : "hidden"}
+                  variants={heroContentLeft}
+                  className="glass-card-dark p-5 sm:p-7 lg:p-9 rounded-3xl border border-white/10 w-full max-w-2xl xl:max-w-3xl"
+                >
+                  <motion.p
+                    variants={heroItem}
+                    className="flex items-start gap-2 text-[11px] sm:text-xs md:text-sm font-medium tracking-[0.14em] uppercase text-accent mb-3 sm:mb-4"
+                  >
+                    <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 mt-px" aria-hidden="true" />
+                    <span>{heroContent.eyebrow}</span>
+                  </motion.p>
+                  <motion.h1
+                    variants={heroItem}
+                    className="font-serif font-semibold tracking-tight text-balance text-primary-foreground text-[2rem] leading-[1.1] sm:text-5xl lg:text-[3.4rem] xl:text-6xl mb-3 sm:mb-5"
+                  >
+                    {heroContent.headline}
+                  </motion.h1>
+                  <motion.p
+                    variants={heroItem}
+                    className="text-sm sm:text-base lg:text-lg text-primary-foreground/85 leading-relaxed max-w-xl mb-5 sm:mb-7"
+                  >
+                    {heroContent.summary}
+                  </motion.p>
+                  <motion.div variants={heroItem} className="flex flex-col sm:flex-row gap-3 mb-5 sm:mb-6">
+                    <Button asChild size="lg" className="w-full sm:w-auto bg-background text-foreground hover:bg-background/90 font-semibold">
+                      <Link href="/booking">
+                        <CalendarCheck className="mr-2 h-4 w-4" />
+                        Check Availability
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-white/40 text-primary-foreground bg-white/5 hover:bg-white/15 hover:text-primary-foreground">
+                      <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Chat on WhatsApp
+                      </a>
+                    </Button>
+                  </motion.div>
+                  <motion.ul
+                    variants={heroItem}
+                    className="flex flex-col sm:flex-row sm:flex-wrap gap-x-5 gap-y-1.5 text-xs sm:text-sm text-primary-foreground/75"
+                  >
+                    {heroContent.trust.map((item, i) => {
+                      const Icon = heroTrustIcons[i];
+                      return (
+                        <li key={item} className="flex items-center gap-2">
+                          <Icon className="h-3.5 w-3.5 text-accent shrink-0" aria-hidden="true" />
+                          {item}
+                        </li>
+                      );
+                    })}
+                  </motion.ul>
+                </motion.div>
 
                 {/* Stats Cards - Glass Effect (from right) */}
-                <AnimatePresence>
-                  {videoEnded && (
+                <motion.div
+                  initial="hidden"
+                  animate={heroReady ? "visible" : "hidden"}
+                  variants={heroCardsRight}
+                  className="hidden md:grid grid-cols-4 lg:grid-cols-2 gap-3 w-full lg:max-w-xs xl:max-w-sm shrink-0"
+                >
+                  {stats.map((stat, index) => (
                     <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={heroCardsRight}
-                      className="hidden md:grid grid-cols-2 gap-3 max-w-sm w-full lg:ml-8 lg:-mt-16 pb-8"
+                      key={index}
+                      variants={fadeInUp}
+                      className="glass-card-dark p-3 lg:p-4 text-center"
                     >
-                      {stats.map((stat, index) => (
-                        <motion.div
-                          key={index}
-                          variants={fadeInUp}
-                          className="glass-card-dark p-4 text-center"
-                        >
-                          <div className="text-3xl font-serif font-semibold text-primary-foreground mb-1">{stat.number}</div>
-                          <div className="text-xs text-primary-foreground/70 uppercase tracking-wider">{stat.label}</div>
-                        </motion.div>
-                      ))}
+                      <div className="text-2xl lg:text-3xl font-serif font-semibold text-primary-foreground mb-1">{stat.number}</div>
+                      <div className="text-[11px] lg:text-xs text-primary-foreground/70 uppercase tracking-wider">{stat.label}</div>
                     </motion.div>
-                  )}
-                </AnimatePresence>
+                  ))}
+                </motion.div>
               </div>
             </div>
-
-
           </section>
         </div>
 
@@ -286,8 +279,8 @@ export default function Home() {
                     className="col-span-5 image-zoom rounded-2xl overflow-hidden"
                   >
                     <Image
-                      src={poolImage.src}
-                      alt="Mulberry Living common area and pool in Negombo"
+                      src={loungeImage.src}
+                      alt="Mulberry Living common lounge area in Negombo"
                       width={900}
                       height={480}
                       quality={80}
@@ -326,6 +319,24 @@ export default function Home() {
                       className="w-full h-64 object-cover"
                     />
                   </motion.div>
+                  {smartEntryImage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.4 }}
+                      className="col-span-12 image-zoom rounded-2xl overflow-hidden"
+                    >
+                      <Image
+                        src={smartEntryImage.src}
+                        alt="Guest-only smart access entrance at Mulberry Living Negombo"
+                        width={1600}
+                        height={600}
+                        quality={80}
+                        className="w-full h-56 md:h-64 object-cover"
+                      />
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>
@@ -349,7 +360,7 @@ export default function Home() {
                     The Mulberry Difference
                   </motion.p>
                   <motion.h2 variants={fadeInUp} className="heading-section mb-6 leading-tight">
-                    Why our guests <br className="hidden lg:block" /> never want to leave.
+                    Why guests stay with us
                   </motion.h2>
                   <motion.p variants={fadeInUp} className="text-lg text-muted-foreground leading-relaxed">
                     We've obsessed over every detail to create a sanctuary that feels both deeply relaxing and cleanly managed. Here is what sets us apart from the rest.
@@ -385,13 +396,19 @@ export default function Home() {
                       )}>
                         <Check className={cn("h-5 w-5", index % 2 === 0 ? "text-accent" : "text-white")} />
                       </div>
-                      <div>
+                      <div className="pr-8 md:pr-10">
                         <h3 className={cn(
-                          "text-xl md:text-2xl font-serif font-medium leading-tight max-w-sm",
+                          "text-xl md:text-2xl font-serif font-medium leading-tight max-w-md mb-2",
                           index % 2 === 0 ? "text-foreground" : "text-white"
                         )}>
-                          {reason}
+                          {reason.title}
                         </h3>
+                        <p className={cn(
+                          "text-sm md:text-base leading-relaxed",
+                          index % 2 === 0 ? "text-muted-foreground" : "text-white/70"
+                        )}>
+                          {reason.description}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -419,9 +436,9 @@ export default function Home() {
                   Everything you need for a perfect stay
                 </h2>
                 <p className="text-lg text-background/70 mb-8 leading-relaxed">
-                  From high-speed Starlink WiFi to stunning rooftop views, we've thought of everything to make your stay comfortable and memorable.
+                  From free Starlink WiFi to guest-only smart entry and rooftop views, we've thought of everything to make your stay comfortable and secure.
                 </p>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {highlightAmenities.map((amenity, i) => (
                     <motion.div
                       key={amenity.label}
@@ -546,7 +563,7 @@ export default function Home() {
                       </p>
 
                       <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                        {room.features.slice(0, 4).map((feature, i) => (
+                        {room.features.map((feature, i) => (
                           <div key={i} className="flex items-start gap-2">
                             <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                             <span className="text-sm text-foreground/80">{feature}</span>
@@ -580,10 +597,18 @@ export default function Home() {
                         })()}
                       </div>
 
-                      <div>
+                      <div className="flex flex-wrap gap-3">
                         <Button asChild variant="outline" className="rounded-full px-6 bg-transparent border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors duration-300">
-                          <Link href="/stays">View Room Details</Link>
+                          <Link href={room.href}>{room.whatsappToBook ? "View Details" : "View Room Details"}</Link>
                         </Button>
+                        {room.whatsappToBook && (
+                          <Button asChild className="rounded-full px-6">
+                            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              WhatsApp to Book
+                            </a>
+                          </Button>
+                        )}
                       </div>
                     </motion.div>
 
@@ -873,7 +898,6 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-      </Layout>
-    </>
+    </Layout>
   );
 }

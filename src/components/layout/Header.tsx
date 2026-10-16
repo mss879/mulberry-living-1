@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import logo from "@/assets/mulberry-logo-white.png";
+import { onPreloaderFinished } from "@/components/Preloader";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -39,17 +40,9 @@ export function Header() {
   }, [pathname]);
 
   useEffect(() => {
-    // If not home, or already saw the sequence, show immediately
-    if (!isHome || sessionStorage.getItem("heroPlayed")) {
-      setShowNavElements(true);
-      return;
-    }
-
-    // Wait for the custom event from the Home view video
-    const handleVideoEnded = () => setShowNavElements(true);
-    window.addEventListener("heroVideoEnded", handleVideoEnded);
-    return () => window.removeEventListener("heroVideoEnded", handleVideoEnded);
-  }, [isHome]);
+    // Animate the nav in together with the hero once the preloader is gone
+    return onPreloaderFinished(() => setShowNavElements(true));
+  }, []);
 
   return (
     <header
@@ -101,7 +94,7 @@ export function Header() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className={cn(
-                  "hidden md:flex items-center gap-8 transition-all duration-500",
+                  "hidden lg:flex items-center gap-8 transition-all duration-500",
                   (!isScrolled && isHome) ? "bg-white px-6 py-2.5 rounded-2xl shadow-xl" : ""
                 )}
               >
@@ -137,7 +130,7 @@ export function Header() {
           <AnimatePresence>
             {showNavElements && (
               <motion.div
-                className="md:hidden flex items-center"
+                className="lg:hidden flex items-center"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
@@ -167,7 +160,7 @@ export function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
@@ -175,7 +168,7 @@ export function Header() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-[100dvh] w-[85%] max-w-[320px] z-[70] bg-background border-l border-border/50 shadow-2xl md:hidden overflow-y-auto flex flex-col"
+              className="fixed top-0 right-0 h-[100dvh] w-[85%] max-w-[320px] z-[70] bg-background border-l border-border/50 shadow-2xl lg:hidden overflow-y-auto flex flex-col"
             >
               <div className="flex items-center justify-between p-6 border-b border-border/10">
                 <span className="font-serif font-medium text-lg text-foreground">Menu</span>

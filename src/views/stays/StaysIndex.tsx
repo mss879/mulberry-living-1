@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { ArrowRight, Bed, Users, Home as HomeIcon, Check } from 'lucide-react';
+import { ArrowRight, Check, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PriceDisplay } from '@/components/ui/PriceDisplay';
 import { Layout } from '@/components/layout/Layout';
@@ -12,6 +12,7 @@ import { useAllConfirmedBookings, getAvailabilityOnDate, getNextAvailableDate } 
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAllStayThumbnails } from '@/hooks/useStayImages';
+import { staticStays, WHATSAPP_URL } from '@/lib/mock-data';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -82,8 +83,8 @@ export default function StaysIndex() {
       <section className="section-padding bg-background">
         <div className="container-wide">
           {isLoading ? (
-            <div className="grid md:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+              {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="rounded-3xl border border-border p-8">
                   <Skeleton className="h-12 w-12 rounded-2xl mb-6" />
                   <Skeleton className="h-8 w-3/4 mb-2" />
@@ -103,7 +104,7 @@ export default function StaysIndex() {
               initial="hidden"
               animate="visible"
               variants={stagger}
-              className="grid md:grid-cols-3 gap-8"
+              className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8"
             >
               {stays?.map((stay) => {
                 const amenities = (stay.amenities as string[]) || [];
@@ -186,6 +187,56 @@ export default function StaysIndex() {
                   </motion.div>
                 );
               })}
+
+              {/* Dorms are booked over WhatsApp, so they are not in the stays table */}
+              {Object.values(staticStays).map((stay) => (
+                <motion.div
+                  key={stay.slug}
+                  variants={fadeInUp}
+                  className="group relative rounded-3xl bg-card border border-border overflow-hidden hover-lift flex flex-col"
+                >
+                  <div className="relative w-full h-64 overflow-hidden">
+                    <Image src={stay.images[0].url} alt={stay.images[0].alt} width={600} height={256} sizes="(max-width: 768px) 100vw, 33vw" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+
+                  <div className="p-8 pt-6 relative flex-1 flex flex-col">
+                    <h3 className="heading-card mb-2 text-foreground">{stay.title}</h3>
+                    <p className="text-sm text-accent font-medium mb-4">{stay.headline}</p>
+                    <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-3">
+                      {stay.summary}
+                    </p>
+
+                    <ul className="space-y-3 mb-6">
+                      {stay.amenities.slice(1).map((amenity) => (
+                        <li key={amenity} className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <Check className="h-4 w-4 text-accent shrink-0" />
+                          {amenity}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="text-sm text-foreground mb-6">
+                      <span className="font-semibold">Best for:</span> {stay.best_for}
+                    </p>
+
+                    <div className="flex flex-col gap-3 mt-auto">
+                      <Button asChild className="w-full">
+                        <Link href={`/stays/${stay.slug}`}>
+                          View Details
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="w-full border-primary/20 hover:bg-primary/5">
+                        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          WhatsApp to Book
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
           )}
         </div>

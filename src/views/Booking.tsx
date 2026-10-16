@@ -9,7 +9,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, startOfDay, addDays, parseISO, isBefore, isSameDay, differenceInCalendarDays } from 'date-fns';
-import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight, Tag, X, Loader2, Plane } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, CheckCircle2, AlertCircle, Bed, Home as HomeIcon, ChevronRight, Tag, X, Loader2, Plane, MessageCircle, Clock, KeyRound, ShieldCheck, Check } from 'lucide-react';
+import { WHATSAPP_URL, WHATSAPP_DISPLAY, CANCELLATION_POLICY } from '@/lib/mock-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -460,6 +461,40 @@ export default function Booking() {
       {/* Booking Form */}
       <section className="section-padding bg-background">
         <div className="container-wide">
+          {/* Trust block */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            className="mb-10 md:mb-12 p-6 md:p-8 rounded-2xl bg-secondary border border-border"
+          >
+            <h2 className="heading-card mb-5">Book direct, hear back fast</h2>
+            <ul className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-sm md:text-base text-muted-foreground">
+              <li className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                <span>Send your dates and we confirm availability within 24 hours, usually much faster.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <MessageCircle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                <span>
+                  Need tonight or landing soon? WhatsApp{' '}
+                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground underline underline-offset-4 hover:text-accent">
+                    {WHATSAPP_DISPLAY}
+                  </a>{' '}
+                  - we reply within a few hours.
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                <span>Check-in 2:00 PM / Check-out 11:00 AM. Early/late check subject to availability.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <KeyRound className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                <span>All stays include guest-only smart door access. Physical smart key at check-in, or entry code via WhatsApp if you arrive late. Instructions sent before arrival.</span>
+              </li>
+            </ul>
+          </motion.div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="grid lg:grid-cols-3 gap-12">
@@ -907,6 +942,38 @@ export default function Booking() {
                     </div>
                   )}
 
+                  {/* Arrival info */}
+                  <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent text-accent-foreground text-sm">
+                        <Plane className="h-3.5 w-3.5" />
+                      </span>
+                      Arriving from the airport?
+                    </h2>
+                    <ul className="space-y-3 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                        <span>Book Airport Pickup ($15) and our team member will meet you at the Meet and Greet area at Bandaranaike International Airport and bring you to Mulberry Living.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                        <span>
+                          Share your flight number and landing time on{' '}
+                          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground underline underline-offset-4 hover:text-accent">WhatsApp</a>{' '}
+                          and we will coordinate.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                        <span>Airport Drop-off ($10) also available on request.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                        <span>Late arrival? No problem. We send your smart entry instructions on WhatsApp so you can get in securely even after hours.</span>
+                      </li>
+                    </ul>
+                  </div>
+
                   {/* Step 4: Guest Information */}
                   <div className="p-6 rounded-2xl bg-card border border-border space-y-6">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -984,6 +1051,15 @@ export default function Booking() {
                       {isSubmitting ? 'Submitting...' : 'Submit Booking Request'}
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
+                  </div>
+
+                  {/* Cancellation */}
+                  <div className="p-6 rounded-2xl bg-secondary border border-border">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
+                      <ShieldCheck className="h-5 w-5 text-accent" />
+                      Cancellation
+                    </h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{CANCELLATION_POLICY}</p>
                   </div>
                 </motion.div>
 

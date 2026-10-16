@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { staticStays } from "@/lib/mock-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://mulberry-living.com";
@@ -80,5 +81,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap: Failed to fetch stays", error);
   }
 
-  return [...staticPages, ...stayPages];
+  const dormPages: MetadataRoute.Sitemap = Object.keys(staticStays).map((slug) => ({
+    url: `${baseUrl}/stays/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...stayPages, ...dormPages];
 }

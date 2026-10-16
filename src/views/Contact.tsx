@@ -21,6 +21,7 @@ import {
 import { Layout } from "@/components/layout/Layout";
 import { toast } from "sonner";
 import emailjs from '@emailjs/browser';
+import { propertyData, CONTACT_EMAIL, WHATSAPP_URL, WHATSAPP_DISPLAY } from "@/lib/mock-data";
 
 const enquirySchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -44,10 +45,16 @@ const contactInfo = [
     href: "tel:+94779900394",
   },
   {
+    icon: Mail,
+    label: "Email",
+    value: CONTACT_EMAIL,
+    href: `mailto:${CONTACT_EMAIL}`,
+  },
+  {
     icon: MessageCircle,
     label: "WhatsApp",
     value: "Chat with us",
-    href: "https://wa.me/94779900394",
+    href: WHATSAPP_URL,
   },
   {
     icon: MapPin,
@@ -194,17 +201,42 @@ export default function Contact() {
                     <div className="p-2 rounded-lg bg-primary/10">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm text-muted-foreground">{item.label}</p>
                       {item.href ? (
                         <a
                           href={item.href}
-                          className="font-medium text-foreground hover:text-primary transition-colors"
+                          {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                          className="font-medium text-foreground hover:text-primary transition-colors break-all"
                         >
                           {item.value}
                         </a>
                       ) : (
                         <p className="font-medium text-foreground">{item.value}</p>
+                      )}
+                      {item.label === "Location" && (
+                        <div className="mt-3 w-full aspect-[4/3] rounded-xl overflow-hidden border border-border">
+                          <iframe
+                            title="Map to Mulberry Living, No 25, Rani Mawatha, Ettukala, Negombo"
+                            src={propertyData.mapEmbedUrl}
+                            className="w-full h-full"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
+                        </div>
+                      )}
+                      {item.label === "Response Time" && (
+                        <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                          <p>
+                            For fastest reply on bookings: WhatsApp{" "}
+                            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary transition-colors">
+                              {WHATSAPP_DISPLAY}
+                            </a>
+                          </p>
+                          <p>Arriving late? Ask us on WhatsApp for smart entry instructions.</p>
+                        </div>
                       )}
                     </div>
                   </div>

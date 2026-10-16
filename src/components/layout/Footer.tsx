@@ -59,6 +59,13 @@ export function Footer() {
                 0779900394
               </a>
               <a
+                href="mailto:info@mulberry-living.com"
+                className="flex items-center gap-3 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                info@mulberry-living.com
+              </a>
+              <a
                 href="https://wa.me/94779900394"
                 target="_blank"
                 rel="noopener noreferrer"

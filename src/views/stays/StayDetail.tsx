@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStayImages } from '@/hooks/useStayImages';
+import { staticStays, WHATSAPP_URL } from '@/lib/mock-data';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -35,11 +36,17 @@ interface Rules {
 
 export default function StayDetail({ slug }: { slug: string }) {
   const router = useRouter();
-  const { data: stay, isLoading: stayLoading, error } = useStay(slug || '');
+  // Dorms are WhatsApp-booked and defined in code; everything else comes from the stays table
+  const staticStay = staticStays[slug];
+  const { data: dbStay, isLoading: stayLoading, error } = useStay(staticStay ? '' : slug || '');
   const { data: bookings = [], isLoading: bookingsLoading } = useAllConfirmedBookings();
-  const { data: stayImages = [] } = useStayImages(stay?.id);
+  const { data: dbStayImages = [] } = useStayImages(dbStay?.id);
 
-  const isLoading = stayLoading || bookingsLoading;
+  const stay = staticStay ? { ...staticStay, id: staticStay.slug } : dbStay;
+  const stayImages = staticStay
+    ? staticStay.images.map((img) => ({ ...img, focal_x: 50, focal_y: 50 }))
+    : dbStayImages;
+  const isLoading = !staticStay && (stayLoading || bookingsLoading);
 
   if (isLoading) {
     return (
@@ -63,7 +70,7 @@ export default function StayDetail({ slug }: { slug: string }) {
     );
   }
 
-  if (error || !stay) {
+  if ((error && !staticStay) || !stay) {
     return (
       <Layout>
         <div className="min-h-screen pt-32 pb-20 bg-background flex items-center justify-center">
@@ -82,17 +89,19 @@ export default function StayDetail({ slug }: { slug: string }) {
   const amenities = Array.isArray(stay.amenities) ? (stay.amenities as string[]) : [];
   const highlights = Array.isArray(stay.highlights) ? (stay.highlights as string[]) : [];
   const faqs = Array.isArray(stay.faqs) ? (stay.faqs as unknown as FAQ[]) : [];
-  const rules = (stay.rules && typeof stay.rules === 'object' && !Array.isArray(stay.rules)) 
-    ? (stay.rules as unknown as Rules) 
+  const rules = (stay.rules && typeof stay.rules === 'object' && !Array.isArray(stay.rules))
+    ? (stay.rules as unknown as Rules)
     : {};
-  
-  const unitType = stay.inventory_type === 'bed' ? 'beds' : stay.inventory_type === 'unit' ? 'unit' : 'rooms';
-  const total = stay.inventory_total ?? 1;
-  
-  // Real-time Availability
+
+  // Real-time availability (only tracked for stays in the booking system)
+  const dbOnly = dbStay && !staticStay ? dbStay : null;
+  const unitType = dbOnly?.inventory_type === 'bed' ? 'beds' : dbOnly?.inventory_type === 'unit' ? 'unit' : 'rooms';
+  const total = dbOnly?.inventory_total ?? 1;
   const today = new Date();
-  const { availableCount, isAvailable } = getAvailabilityOnDate(today, stay, bookings);
-  const nextDate = !isAvailable ? getNextAvailableDate(stay, bookings) : null;
+  const { availableCount, isAvailable } = dbOnly
+    ? getAvailabilityOnDate(today, dbOnly, bookings)
+    : { availableCount: 0, isAvailable: true };
+  const nextDate = dbOnly && !isAvailable ? getNextAvailableDate(dbOnly, bookings) : null;
 
   // Dynamic images from DB, with fallback
   const galleryImages = stayImages.length > 0
@@ -122,7 +131,7 @@ export default function StayDetail({ slug }: { slug: string }) {
               {stay.title}
             </h1>
             
-            <div className="flex justify-center mb-6">
+            {dbOnly && <div className="flex justify-center mb-6">
               <div className={`px-4 py-1.5 rounded-full text-sm font-medium border ${
                 isAvailable 
                   ? 'bg-primary/10 text-primary border-primary/20' 
@@ -132,7 +141,7 @@ export default function StayDetail({ slug }: { slug: string }) {
                   ? `${availableCount} ${unitType} currently available` 
                   : nextDate ? `Booked till ${format(nextDate, 'MMMM d, yyyy')}` : 'Currently fully booked'}
               </div>
-            </div>
+            </div>}
 
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0 text-center md:text-left">
               {stay.summary}
@@ -270,12 +279,38 @@ export default function StayDetail({ slug }: { slug: string }) {
               transition={{ delay: 0.2 }}
             >
               <div className="sticky top-28 p-6 rounded-2xl bg-card border border-border space-y-6">
+                {staticStay ? (
+                  <>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">{staticStay.headline}</p>
+                      <p className="text-2xl font-serif font-semibold text-foreground">Book on WhatsApp</p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Send us your dates and number of beds and we will confirm availability and rates.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <Button asChild size="lg" className="w-full">
+                        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          WhatsApp to Book
+                        </a>
+                      </Button>
+                      <Button asChild variant="outline" size="lg" className="w-full">
+                        <Link href="/stays">
+                          View All Stays
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                <>
                 <div>
                   <PriceDisplay
-                    pricePerNight={stay.price_per_night}
-                    discountPercentage={stay.discount_percentage}
-                    discountLabel={stay.discount_label}
-                    priceText={stay.price_text}
+                    pricePerNight={dbOnly?.price_per_night}
+                    discountPercentage={dbOnly?.discount_percentage}
+                    discountLabel={dbOnly?.discount_label}
+                    priceText={dbOnly?.price_text}
                     size="lg"
                   />
                   {total && (
@@ -314,6 +349,9 @@ export default function StayDetail({ slug }: { slug: string }) {
                     </a>
                   </Button>
                 </div>
+
+                </>
+                )}
 
                 <div className="pt-4 border-t border-border">
                   <p className="text-sm text-muted-foreground">

@@ -2,12 +2,29 @@ import type { Metadata } from "next";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import StayDetail from "@/views/stays/StayDetail";
+import { staticStays } from "@/lib/mock-data";
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
+  const staticStay = staticStays[params.slug];
+  if (staticStay) {
+    const url = `https://mulberry-living.com/stays/${params.slug}`;
+    return {
+      title: `${staticStay.title} — ${staticStay.headline}`,
+      description: `${staticStay.summary} Ettukala, Negombo, 12 km from Colombo airport.`,
+      alternates: { canonical: url },
+      openGraph: {
+        title: `${staticStay.title} | Mulberry Living — Negombo`,
+        description: staticStay.summary,
+        url,
+        images: [{ url: staticStay.images[0].url, width: 1200, height: 630, alt: staticStay.images[0].alt }],
+      },
+    };
+  }
+
   const cookieStore = cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

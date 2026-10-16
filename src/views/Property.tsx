@@ -21,10 +21,10 @@ import poolImage from "@/assets/villa-pool.jpg";
 import terraceImage from "@/assets/villa-terrace.jpg";
 
 const galleryImages = [
-  { src: heroImage.src, alt: "Villa exterior with pool" },
+  { src: heroImage.src, alt: "Mulberry Living exterior" },
   { src: interiorImage.src, alt: "Living room with fireplace" },
   { src: bedroomImage.src, alt: "Master bedroom" },
-  { src: poolImage.src, alt: "Infinity pool" },
+  { src: poolImage.src, alt: "Mulberry Living common lounge area in Negombo" },
   { src: terraceImage.src, alt: "Outdoor dining terrace" },
 ];
 
